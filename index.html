@@ -165,7 +165,7 @@
   .field{display:flex;flex-direction:column;gap:6px;}
   .field.full{grid-column:1 / -1;}
   .field label{font-size:12.5px;color:var(--ink-soft);font-weight:600;}
-  .field input, .field textarea{
+  .field input, .field textarea, .field select{
     font-family:inherit;
     font-size:15px;
     padding:9px 10px;
@@ -174,7 +174,7 @@
     color:var(--ink-deep);
     border-radius:2px;
   }
-  .field input:focus, .field textarea:focus{outline:2px solid var(--stamp);outline-offset:0;border-color:var(--stamp);}
+  .field input:focus, .field textarea:focus, .field select:focus{outline:2px solid var(--stamp);outline-offset:0;border-color:var(--stamp);}
   .field textarea{resize:vertical;min-height:38px;font-family:inherit;}
   .form-actions{grid-column:1/-1;display:flex;gap:10px;justify-content:flex-end;margin-top:4px;}
   .btn-save{background:var(--ink-deep);color:#fff;padding:10px 22px;border-radius:2px;font-weight:600;font-size:14.5px;}
@@ -287,6 +287,13 @@
       <label for="f-out">เบิก</label>
       <input type="number" id="f-out" placeholder="0" min="0" step="1">
     </div>
+    <div class="field">
+      <label for="f-unit">หน่วย</label>
+      <select id="f-unit">
+        <option value="แพ็ค">แพ็ค</option>
+        <option value="ขวด">ขวด</option>
+      </select>
+    </div>
     <div class="field full" id="previewField">
       <label>คงเหลือ (คำนวณอัตโนมัติ)</label>
       <div id="remainPreview" style="padding:9px 10px;background:#F1ECDD;border:1px dashed #C9BE9F;font-weight:700;color:var(--ink-deep);">0</div>
@@ -347,6 +354,7 @@
   const fItem = document.getElementById('f-item');
   const fIn = document.getElementById('f-in');
   const fOut = document.getElementById('f-out');
+  const fUnit = document.getElementById('f-unit');
   const fNote = document.getElementById('f-note');
   const remainPreview = document.getElementById('remainPreview');
 
@@ -360,15 +368,31 @@
     return isNaN(n) ? 0 : n;
   }
 
-  function visibleEntries(){
-    // returns entries for the active size, each annotated with a computed running balance
-    let running = 0;
-    return allEntries
+  // Chronological (oldest -> newest) list for the active size, with a running balance
+  // tracked SEPARATELY per unit (แพ็ค / ขวด), since the two units aren't interchangeable
+  // without a conversion factor.
+  function chronologicalEntries(){
+    const running = { 'แพ็ค': 0, 'ขวด': 0 };
+    const list = allEntries
       .filter(e => (e.size || '350') === activeSize)
       .map(e => {
-        running = running + num(e.received) - num(e.withdrawn);
-        return { ...e, remaining: running };
+        const unit = e.unit || 'แพ็ค';
+        running[unit] = running[unit] + num(e.received) - num(e.withdrawn);
+        return { ...e, remaining: running[unit], remainingUnit: unit };
       });
+    return { list, finalRunning: running };
+  }
+
+  // Newest-first list for display
+  function visibleEntries(){
+    return chronologicalEntries().list.slice().reverse();
+  }
+
+  function baseBeforeIndex(ascList, idx, unit){
+    for (let i = idx - 1; i >= 0; i--){
+      if ((ascList[i].unit || 'แพ็ค') === unit) return ascList[i].remaining;
+    }
+    return 0;
   }
 
   // ---- Form open/close: this must always work, independent of Firebase status ----
@@ -387,22 +411,19 @@
     updatePreview();
   }
   function updatePreview(){
-    const list = visibleEntries();
-    const base = editingId
-      ? (() => { // if editing, base is the balance right before this entry
-          const idx = list.findIndex(x => x.id === editingId);
-          if (idx <= 0) return 0;
-          return list[idx - 1].remaining;
-        })()
-      : (list.length ? list[list.length - 1].remaining : 0);
+    const { list } = chronologicalEntries();
+    const unit = fUnit.value || 'แพ็ค';
+    const idx = editingId ? list.findIndex(x => x.id === editingId) : list.length;
+    const base = baseBeforeIndex(list, idx === -1 ? list.length : idx, unit);
     const preview = base + num(fIn.value) - num(fOut.value);
-    remainPreview.textContent = preview.toLocaleString('th-TH');
+    remainPreview.textContent = `${preview.toLocaleString('th-TH')} ${unit}`;
   }
 
   toggleFormBtn.addEventListener('click', () => openForm(false));
   cancelBtn.addEventListener('click', closeForm);
   fIn.addEventListener('input', updatePreview);
   fOut.addEventListener('input', updatePreview);
+  fUnit.addEventListener('change', updatePreview);
 
   sizeTabs.addEventListener('click', (e) => {
     const btn = e.target.closest('.tab');
@@ -426,7 +447,9 @@
       latestStock.textContent = '0';
       return;
     }
-    tableBody.innerHTML = entries.map((e, i) => `
+    tableBody.innerHTML = entries.map((e, i) => {
+      const unit = e.remainingUnit;
+      return `
       <tr class="${num(e.received) > 0 ? 'received' : ''}">
         <td class="actions" style="text-align:left;">
           <button class="icon-btn move" title="เลื่อนขึ้น" data-move="-1" data-id="${e.id}" ${i===0?'disabled style="opacity:.3"':''}>↑</button
@@ -434,18 +457,23 @@
         </td>
         <td>${esc(e.date)}</td>
         <td class="item">${esc(e.item)}</td>
-        <td class="num">${num(e.received) ? num(e.received).toLocaleString('th-TH') : ''}</td>
-        <td class="num">${num(e.withdrawn) ? num(e.withdrawn).toLocaleString('th-TH') : ''}</td>
-        <td class="num remaining">${e.remaining.toLocaleString('th-TH')}</td>
+        <td class="num">${num(e.received) ? num(e.received).toLocaleString('th-TH') + ' ' + esc(unit) : ''}</td>
+        <td class="num">${num(e.withdrawn) ? num(e.withdrawn).toLocaleString('th-TH') + ' ' + esc(unit) : ''}</td>
+        <td class="num remaining">${e.remaining.toLocaleString('th-TH')} ${esc(unit)}</td>
         <td>${esc(e.note)}</td>
         <td class="actions">
           <button class="icon-btn edit" data-edit="${e.id}">แก้ไข</button>
           <button class="icon-btn del" data-del="${e.id}">ลบ</button>
         </td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
 
-    latestStock.textContent = entries[entries.length - 1].remaining.toLocaleString('th-TH');
+    const { finalRunning } = chronologicalEntries();
+    const parts = [];
+    if (finalRunning['แพ็ค']) parts.push(`${finalRunning['แพ็ค'].toLocaleString('th-TH')} แพ็ค`);
+    if (finalRunning['ขวด']) parts.push(`${finalRunning['ขวด'].toLocaleString('th-TH')} ขวด`);
+    latestStock.textContent = parts.length ? parts.join(' / ') : '0';
   }
 
   tableBody.addEventListener('click', (e) => {
@@ -465,6 +493,7 @@
     fItem.value = e.item || '';
     fIn.value = e.received || '';
     fOut.value = e.withdrawn || '';
+    fUnit.value = e.unit || 'แพ็ค';
     fNote.value = e.note || '';
     openForm(true);
   }
@@ -524,6 +553,7 @@
       item: item,
       received: fIn.value === '' ? 0 : num(fIn.value),
       withdrawn: fOut.value === '' ? 0 : num(fOut.value),
+      unit: fUnit.value || 'แพ็ค',
       note: fNote.value.trim(),
     };
 
