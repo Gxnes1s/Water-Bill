@@ -5,257 +5,366 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>บัญชี รับ-จ่าย น้ำสวัสดิการ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#F6F1E6;
-    --paper-line:#DCD2B8;
-    --ink:#26364B;
-    --ink-soft:#5B6B7E;
-    --ink-deep:#16222F;
-    --seal:#A6402F;
-    --seal-soft:#E7CFC6;
-    --stamp:#3C6E63;
-    --stamp-soft:#D6E4DE;
-    --card:#FFFDF8;
-    --shadow: 0 1px 0 rgba(38,54,75,0.08);
+    --navy-950:#081327;
+    --navy-900:#0C1F3E;
+    --navy-800:#132C54;
+    --navy-700:#1E3E70;
+    --navy-line: rgba(212,175,55,0.18);
+    --gold-300:#F2DFA3;
+    --gold-400:#E3C574;
+    --gold-500:#CDA43B;
+    --gold-600:#A9822A;
+    --paper:#FBF8F0;
+    --paper-line:#E7DEC4;
+    --card:#FFFFFF;
+    --ink:#16233A;
+    --ink-soft:#5B6B80;
+    --ink-faint:#8A97A8;
+    --credit:#2F6B4F;
+    --credit-soft:#E4EFE7;
+    --debit:#9A4B33;
+    --debit-soft:#F3E5DD;
+    --radius-lg:16px;
+    --radius-md:10px;
+    --shadow-card: 0 10px 30px -18px rgba(8,19,39,0.35), 0 1px 2px rgba(8,19,39,0.06);
   }
   *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
   body{
     margin:0;
     background:var(--paper);
-    background-image:
-      linear-gradient(var(--paper-line) 1px, transparent 1px);
-    background-size: 100% 42px;
     color:var(--ink);
     font-family:'Noto Sans Thai', sans-serif;
     min-height:100vh;
+    -webkit-font-smoothing:antialiased;
   }
+  ::selection{background:var(--gold-400);color:var(--navy-950);}
+  :focus-visible{outline:2px solid var(--gold-500);outline-offset:2px;}
+
+  /* ---------- Header ---------- */
   header{
-    padding:36px 24px 20px;
-    max-width:1080px;
+    position:relative;
+    background:
+      radial-gradient(1100px 420px at 15% -20%, rgba(227,197,116,0.12), transparent 60%),
+      linear-gradient(160deg, var(--navy-950) 0%, var(--navy-900) 55%, var(--navy-800) 100%);
+    color:var(--paper);
+    padding:40px 28px 30px;
+    overflow:hidden;
+  }
+  header::after{
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:3px;
+    background:linear-gradient(90deg, transparent, var(--gold-500) 18%, var(--gold-300) 50%, var(--gold-500) 82%, transparent);
+  }
+  .header-inner{
+    max-width:1100px;
     margin:0 auto;
     display:flex;
     justify-content:space-between;
     align-items:flex-end;
-    gap:20px;
+    gap:24px;
     flex-wrap:wrap;
-    border-bottom:2px solid var(--ink-deep);
   }
-  .title-block{max-width:640px;}
+  .brand{
+    display:flex;
+    align-items:flex-start;
+    gap:16px;
+    max-width:620px;
+  }
+  .brand-mark{
+    flex:none;
+    width:46px;height:46px;
+    border-radius:50%;
+    display:grid;place-items:center;
+    background:linear-gradient(155deg, rgba(227,197,116,0.16), rgba(227,197,116,0.02));
+    border:1.5px solid var(--gold-500);
+    margin-top:4px;
+  }
+  .brand-mark svg{width:24px;height:24px;}
   .eyebrow{
-    font-size:13px;
-    color:var(--ink-soft);
+    font-size:12.5px;
+    letter-spacing:0.03em;
+    color:var(--gold-300);
     margin:0 0 6px;
-    letter-spacing:0.02em;
+    font-weight:600;
   }
   h1{
     font-family:'Noto Serif Thai', serif;
     font-weight:700;
-    font-size:clamp(26px,4vw,36px);
-    margin:0 0 4px;
-    color:var(--ink-deep);
-    line-height:1.25;
+    font-size:clamp(24px,3.6vw,34px);
+    margin:0 0 6px;
+    color:#FCF9EF;
+    line-height:1.3;
   }
   .subtitle{
-    font-size:15px;
-    color:var(--ink-soft);
+    font-size:14.5px;
+    color:rgba(251,248,240,0.62);
     margin:0;
+    max-width:52ch;
   }
   .stock-plate{
-    background:var(--ink-deep);
-    color:var(--paper);
-    padding:16px 26px;
+    background:linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+    border:1px solid var(--gold-500);
+    border-radius:var(--radius-md);
+    padding:14px 22px;
     text-align:right;
-    min-width:200px;
-    position:relative;
-  }
-  .stock-plate::before{
-    content:"";
-    position:absolute;
-    top:6px; left:6px; right:6px; bottom:6px;
-    border:1px solid rgba(246,241,230,0.35);
-    pointer-events:none;
+    min-width:190px;
   }
   .stock-plate .label{
-    font-size:12px;
-    color:#C9D3DC;
+    font-size:11.5px;
+    color:var(--gold-300);
     display:block;
-    margin-bottom:4px;
+    margin-bottom:6px;
+    font-weight:600;
   }
   .stock-plate .value{
     font-family:'Noto Serif Thai', serif;
-    font-size:30px;
+    font-size:26px;
     font-weight:700;
-    line-height:1;
+    line-height:1.2;
+    color:#FCF9EF;
   }
 
-  main{max-width:1080px;margin:0 auto;padding:24px;}
+  main{max-width:1100px;margin:0 auto;padding:26px 24px 40px;}
 
+  /* ---------- Size tabs ---------- */
   .size-tabs{
     display:flex;
-    gap:2px;
-    margin-bottom:18px;
-    border-bottom:2px solid var(--ink-deep);
+    gap:8px;
+    margin-bottom:20px;
   }
   .size-tabs .tab{
-    background:transparent;
+    background:var(--card);
     color:var(--ink-soft);
     font-family:'Noto Serif Thai', serif;
     font-weight:600;
-    font-size:15.5px;
-    padding:10px 22px;
+    font-size:14.5px;
+    padding:10px 20px;
     border:1px solid var(--paper-line);
-    border-bottom:none;
-    border-radius:2px 2px 0 0;
-    position:relative;
-    top:2px;
+    border-radius:999px;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
   }
   .size-tabs .tab.active{
-    background:var(--ink-deep);
-    color:var(--paper);
-    border-color:var(--ink-deep);
+    background:var(--navy-900);
+    color:var(--gold-300);
+    border-color:var(--navy-900);
   }
   .size-tabs .tab:not(.active):hover{
-    background:var(--stamp-soft);
-    color:var(--stamp);
+    border-color:var(--gold-500);
+    color:var(--navy-900);
   }
 
+  /* ---------- Toolbar ---------- */
   .toolbar{
     display:flex;
     justify-content:space-between;
     align-items:center;
     margin-bottom:16px;
-    gap:12px;
+    gap:14px;
     flex-wrap:wrap;
   }
   .status{
     font-size:13px;
     color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:7px;
   }
-  .status.err{color:var(--seal);}
-  button{
-    font-family:inherit;
-    cursor:pointer;
-    border:none;
+  .status::before{
+    content:"";
+    width:7px;height:7px;
+    border-radius:50%;
+    background:var(--ink-faint);
+    flex:none;
   }
-  .btn-add{
-    background:var(--stamp);
-    color:#fff;
-    padding:11px 20px;
-    font-size:15px;
-    font-weight:600;
-    border-radius:2px;
-    box-shadow:var(--shadow);
-  }
-  .btn-add:hover{background:#325a51;}
+  .status.ok::before{background:var(--credit);}
+  .status.err{color:var(--debit);}
+  .status.err::before{background:var(--debit);}
 
+  button{font-family:inherit;cursor:pointer;border:none;}
+  .btn-add{
+    background:linear-gradient(160deg, var(--gold-400), var(--gold-600));
+    color:var(--navy-950);
+    padding:11px 22px;
+    font-size:14.5px;
+    font-weight:700;
+    border-radius:999px;
+    box-shadow:0 6px 16px -8px rgba(169,130,42,0.7);
+  }
+  .btn-add:hover{filter:brightness(1.05);}
+  .btn-add:active{transform:translateY(1px);}
+
+  /* ---------- Form ---------- */
   form.entry-form{
     background:var(--card);
     border:1px solid var(--paper-line);
-    border-left:4px solid var(--stamp);
-    padding:20px;
-    margin-bottom:20px;
+    border-left:4px solid var(--gold-500);
+    border-radius:var(--radius-lg);
+    padding:22px;
+    margin-bottom:22px;
     display:none;
     grid-template-columns:1fr 1fr;
-    gap:14px;
+    gap:16px;
+    box-shadow:var(--shadow-card);
   }
   form.entry-form.open{display:grid;}
-  form.entry-form.editing{border-left-color:var(--seal);}
+  form.entry-form.editing{border-left-color:var(--debit);}
   .field{display:flex;flex-direction:column;gap:6px;}
   .field.full{grid-column:1 / -1;}
   .field label{font-size:12.5px;color:var(--ink-soft);font-weight:600;}
   .field input, .field textarea, .field select{
     font-family:inherit;
     font-size:15px;
-    padding:9px 10px;
-    border:1px solid #C9BE9F;
-    background:#fff;
-    color:var(--ink-deep);
-    border-radius:2px;
+    padding:10px 12px;
+    border:1px solid var(--paper-line);
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:var(--radius-md);
   }
-  .field input:focus, .field textarea:focus, .field select:focus{outline:2px solid var(--stamp);outline-offset:0;border-color:var(--stamp);}
+  .field input:focus, .field textarea:focus, .field select:focus{
+    outline:none;border-color:var(--gold-500);
+    box-shadow:0 0 0 3px rgba(205,164,59,0.18);
+    background:#fff;
+  }
   .field textarea{resize:vertical;min-height:38px;font-family:inherit;}
-  .form-actions{grid-column:1/-1;display:flex;gap:10px;justify-content:flex-end;margin-top:4px;}
-  .btn-save{background:var(--ink-deep);color:#fff;padding:10px 22px;border-radius:2px;font-weight:600;font-size:14.5px;}
-  .btn-save:hover{background:#0e1822;}
-  .btn-cancel{background:transparent;color:var(--ink-soft);padding:10px 16px;font-size:14.5px;}
-  .btn-cancel:hover{color:var(--ink-deep);}
+  .form-actions{grid-column:1/-1;display:flex;gap:10px;justify-content:flex-end;margin-top:2px;}
+  .btn-save{background:linear-gradient(160deg, var(--navy-800), var(--navy-950));color:var(--gold-300);padding:11px 24px;border-radius:999px;font-weight:700;font-size:14.5px;}
+  .btn-save:hover{filter:brightness(1.15);}
+  .btn-cancel{background:transparent;color:var(--ink-soft);padding:11px 16px;font-size:14.5px;border-radius:999px;}
+  .btn-cancel:hover{color:var(--ink);background:var(--paper);}
+  #remainPreview{
+    padding:10px 12px;background:var(--paper);border:1px dashed var(--gold-500);
+    border-radius:var(--radius-md);font-weight:700;color:var(--navy-900);
+  }
 
+  /* ---------- Table ---------- */
   .table-wrap{
     background:var(--card);
     border:1px solid var(--paper-line);
-    overflow-x:auto;
+    border-radius:var(--radius-lg);
+    overflow:hidden;
+    box-shadow:var(--shadow-card);
   }
-  table{width:100%;border-collapse:collapse;min-width:820px;}
+  .table-scroll{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;min-width:760px;}
   thead th{
     font-family:'Noto Serif Thai', serif;
-    background:var(--ink-deep);
-    color:var(--paper);
+    background:linear-gradient(160deg, var(--navy-900), var(--navy-800));
+    color:var(--gold-300);
     font-weight:600;
-    font-size:14.5px;
+    font-size:14px;
     text-align:left;
-    padding:12px 14px;
-    position:sticky;
-    top:0;
+    padding:13px 16px;
   }
   thead th.num{text-align:right;}
   tbody td{
-    padding:11px 14px;
+    padding:12px 16px;
     border-bottom:1px solid var(--paper-line);
     font-size:14.5px;
     vertical-align:top;
   }
+  tbody tr:last-child td{border-bottom:none;}
   tbody td.num{text-align:right;font-variant-numeric:tabular-nums;}
-  tbody tr:hover{background:#FBF7EC;}
-  tbody tr.received td.remaining{color:var(--stamp);font-weight:600;}
+  tbody tr:hover{background:#FCFAF2;}
+  tbody tr.received td.received-cell{color:var(--credit);font-weight:600;}
+  tbody tr td.withdrawn-cell:not(:empty){color:var(--debit);font-weight:600;}
+  td.remaining{font-weight:700;color:var(--navy-900);}
   td.item{max-width:260px;}
   td.item .note{display:block;font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
   td.actions{white-space:nowrap;text-align:right;}
   .icon-btn{
     background:transparent;
-    padding:5px 8px;
+    padding:6px 10px;
     font-size:13px;
     color:var(--ink-soft);
-    border-radius:2px;
+    border-radius:999px;
+    font-weight:600;
   }
-  .icon-btn:hover{background:var(--stamp-soft);color:var(--stamp);}
-  .icon-btn.del:hover{background:var(--seal-soft);color:var(--seal);}
-  .icon-btn.move{color:var(--ink-soft);}
+  .icon-btn.edit:hover{background:var(--navy-900);color:var(--gold-300);}
+  .icon-btn.del:hover{background:var(--debit-soft);color:var(--debit);}
   .empty-row td{
     text-align:center;
-    padding:40px 20px;
+    padding:48px 20px;
     color:var(--ink-soft);
     font-size:14.5px;
   }
 
   footer{
-    max-width:1080px;
+    max-width:1100px;
     margin:0 auto;
-    padding:14px 24px 40px;
+    padding:16px 24px 44px;
     font-size:12.5px;
-    color:var(--ink-soft);
+    color:var(--ink-faint);
+    text-align:center;
   }
 
-  @media (max-width:600px){
-    header{padding:24px 16px 16px;}
-    main{padding:16px;}
-    form.entry-form{grid-template-columns:1fr;padding:16px;}
+  /* ---------- Responsive: card-table for small screens ---------- */
+  @media (max-width:700px){
+    header{padding:28px 18px 22px;}
+    .header-inner{align-items:stretch;}
     .stock-plate{text-align:left;width:100%;}
+    main{padding:18px 14px 32px;}
+    form.entry-form{grid-template-columns:1fr;padding:18px;}
+    .size-tabs{overflow-x:auto;padding-bottom:2px;}
+
+    .table-wrap{border-radius:var(--radius-md);}
+    table{min-width:0;}
+    thead{display:none;}
+    tbody, tr, td{display:block;width:100%;}
+    tbody tr{
+      padding:14px 16px;
+      border-bottom:8px solid var(--paper);
+    }
+    tbody tr:last-child{border-bottom:none;}
+    tbody td{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      text-align:right;
+      padding:7px 0;
+      border-bottom:1px dashed var(--paper-line);
+    }
+    tbody td:last-of-type{border-bottom:none;}
+    tbody td::before{
+      content:attr(data-label);
+      font-weight:600;
+      color:var(--ink-soft);
+      text-align:left;
+      flex:0 0 auto;
+    }
+    td.item{max-width:none;}
+    td.actions{justify-content:flex-end;gap:6px;padding-top:10px;}
+    td.actions::before{content:none;}
+    .icon-btn{padding:7px 12px;background:var(--paper);}
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="title-block">
-    <p class="eyebrow">แผนกสวัสดิการ</p>
-    <h1>บัญชี รับ – จ่าย น้ำดื่มสวัสดิการ</h1>
-    <p class="subtitle" id="subtitleText">บันทึกและติดตามยอดคงเหลือแบบเรียลไทม์</p>
-  </div>
-  <div class="stock-plate">
-    <span class="label" id="stockLabel">คงเหลือ 350 มล.</span>
-    <span class="value" id="latestStock">–</span>
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3C12 3 5.5 10.6 5.5 15.2C5.5 18.7 8.4 21 12 21C15.6 21 18.5 18.7 18.5 15.2C18.5 10.6 12 3 12 3Z" stroke="#E3C574" stroke-width="1.4" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <div class="title-block">
+        <p class="eyebrow">แผนกสวัสดิการ</p>
+        <h1>บัญชี รับ – จ่าย น้ำดื่มสวัสดิการ</h1>
+        <p class="subtitle" id="subtitleText">บันทึกและติดตามยอดคงเหลือแบบเรียลไทม์</p>
+      </div>
+    </div>
+    <div class="stock-plate">
+      <span class="label" id="stockLabel">คงเหลือ 350 มล.</span>
+      <span class="value" id="latestStock">–</span>
+    </div>
   </div>
 </header>
 
@@ -296,7 +405,7 @@
     </div>
     <div class="field full" id="previewField">
       <label>คงเหลือ (คำนวณอัตโนมัติ)</label>
-      <div id="remainPreview" style="padding:9px 10px;background:#F1ECDD;border:1px dashed #C9BE9F;font-weight:700;color:var(--ink-deep);">0</div>
+      <div id="remainPreview">0</div>
     </div>
     <div class="field">
       <label for="f-note">หมายเหตุ</label>
@@ -309,10 +418,10 @@
   </form>
 
   <div class="table-wrap">
+    <div class="table-scroll">
     <table>
       <thead>
         <tr>
-          <th style="width:36px;"></th>
           <th style="width:100px;">วัน/ด/ป</th>
           <th>รายการ</th>
           <th class="num">รับ</th>
@@ -323,9 +432,10 @@
         </tr>
       </thead>
       <tbody id="tableBody">
-        <tr class="empty-row"><td colspan="8">ยังไม่มีรายการ</td></tr>
+        <tr class="empty-row"><td colspan="7">ยังไม่มีรายการ</td></tr>
       </tbody>
     </table>
+    </div>
   </div>
 </main>
 
@@ -363,24 +473,42 @@
   let allEntries = [];
   let nextOrder = {}; // per-size counter, e.g. {350: 5, 600: 2}
 
+  const BOTTLES_PER_PACK = 12; // 1 แพ็ค = 12 ขวด
+
   function num(v){
     const n = parseFloat(v);
     return isNaN(n) ? 0 : n;
   }
 
-  // Chronological (oldest -> newest) list for the active size, with a running balance
-  // tracked SEPARATELY per unit (แพ็ค / ขวด), since the two units aren't interchangeable
-  // without a conversion factor.
+  function toBottles(amount, unit){
+    return num(amount) * (unit === 'แพ็ค' ? BOTTLES_PER_PACK : 1);
+  }
+
+  // Formats a total bottle count as "X แพ็ค Y ขวด" (12 ขวด = 1 แพ็ค), combined into one figure.
+  function formatBottles(totalBottles){
+    const sign = totalBottles < 0 ? '-' : '';
+    const abs = Math.round(Math.abs(totalBottles) * 100) / 100;
+    const packs = Math.floor(abs / BOTTLES_PER_PACK);
+    const bottles = Math.round((abs - packs * BOTTLES_PER_PACK) * 100) / 100;
+    const parts = [];
+    if (packs) parts.push(`${packs.toLocaleString('th-TH')} แพ็ค`);
+    if (bottles || !packs) parts.push(`${bottles.toLocaleString('th-TH')} ขวด`);
+    return sign + parts.join(' ');
+  }
+
+  // Chronological (oldest -> newest) list for the active size, with a single running
+  // balance in bottles — รับ/เบิก entered as แพ็ค are converted (×12) before adding,
+  // so คงเหลือ is always one combined figure (e.g. "2 แพ็ค 3 ขวด").
   function chronologicalEntries(){
-    const running = { 'แพ็ค': 0, 'ขวด': 0 };
+    let runningBottles = 0;
     const list = allEntries
       .filter(e => (e.size || '350') === activeSize)
       .map(e => {
         const unit = e.unit || 'แพ็ค';
-        running[unit] = running[unit] + num(e.received) - num(e.withdrawn);
-        return { ...e, remaining: running[unit], remainingUnit: unit };
+        runningBottles += toBottles(e.received, unit) - toBottles(e.withdrawn, unit);
+        return { ...e, remainingBottles: runningBottles };
       });
-    return { list, finalRunning: running };
+    return { list, finalBottles: runningBottles };
   }
 
   // Newest-first list for display
@@ -388,11 +516,8 @@
     return chronologicalEntries().list.slice().reverse();
   }
 
-  function baseBeforeIndex(ascList, idx, unit){
-    for (let i = idx - 1; i >= 0; i--){
-      if ((ascList[i].unit || 'แพ็ค') === unit) return ascList[i].remaining;
-    }
-    return 0;
+  function baseBeforeIndex(ascList, idx){
+    return idx > 0 ? ascList[idx - 1].remainingBottles : 0;
   }
 
   // ---- Form open/close: this must always work, independent of Firebase status ----
@@ -414,9 +539,9 @@
     const { list } = chronologicalEntries();
     const unit = fUnit.value || 'แพ็ค';
     const idx = editingId ? list.findIndex(x => x.id === editingId) : list.length;
-    const base = baseBeforeIndex(list, idx === -1 ? list.length : idx, unit);
-    const preview = base + num(fIn.value) - num(fOut.value);
-    remainPreview.textContent = `${preview.toLocaleString('th-TH')} ${unit}`;
+    const base = baseBeforeIndex(list, idx === -1 ? list.length : idx);
+    const preview = base + toBottles(fIn.value, unit) - toBottles(fOut.value, unit);
+    remainPreview.textContent = formatBottles(preview);
   }
 
   toggleFormBtn.addEventListener('click', () => openForm(false));
@@ -443,24 +568,20 @@
   function render(){
     const entries = visibleEntries();
     if (!entries.length){
-      tableBody.innerHTML = `<tr class="empty-row"><td colspan="8">ยังไม่มีรายการสำหรับขนาด ${activeSize} มล. — กด "เพิ่มรายการ" เพื่อเริ่มบันทึก</td></tr>`;
-      latestStock.textContent = '0';
+      tableBody.innerHTML = `<tr class="empty-row"><td colspan="7">ยังไม่มีรายการสำหรับขนาด ${activeSize} มล. — กด "เพิ่มรายการ" เพื่อเริ่มบันทึก</td></tr>`;
+      latestStock.textContent = formatBottles(0);
       return;
     }
-    tableBody.innerHTML = entries.map((e, i) => {
-      const unit = e.remainingUnit;
+    tableBody.innerHTML = entries.map((e) => {
+      const unit = e.unit || 'แพ็ค';
       return `
       <tr class="${num(e.received) > 0 ? 'received' : ''}">
-        <td class="actions" style="text-align:left;">
-          <button class="icon-btn move" title="เลื่อนขึ้น" data-move="-1" data-id="${e.id}" ${i===0?'disabled style="opacity:.3"':''}>↑</button
-          ><button class="icon-btn move" title="เลื่อนลง" data-move="1" data-id="${e.id}" ${i===entries.length-1?'disabled style="opacity:.3"':''}>↓</button>
-        </td>
-        <td>${esc(e.date)}</td>
-        <td class="item">${esc(e.item)}</td>
-        <td class="num">${num(e.received) ? num(e.received).toLocaleString('th-TH') + ' ' + esc(unit) : ''}</td>
-        <td class="num">${num(e.withdrawn) ? num(e.withdrawn).toLocaleString('th-TH') + ' ' + esc(unit) : ''}</td>
-        <td class="num remaining">${e.remaining.toLocaleString('th-TH')} ${esc(unit)}</td>
-        <td>${esc(e.note)}</td>
+        <td data-label="วัน/ด/ป">${esc(e.date)}</td>
+        <td class="item" data-label="รายการ">${esc(e.item)}</td>
+        <td class="num received-cell" data-label="รับ">${num(e.received) ? num(e.received).toLocaleString('th-TH') + ' ' + esc(unit) : ''}</td>
+        <td class="num withdrawn-cell" data-label="เบิก">${num(e.withdrawn) ? num(e.withdrawn).toLocaleString('th-TH') + ' ' + esc(unit) : ''}</td>
+        <td class="num remaining" data-label="คงเหลือ">${formatBottles(e.remainingBottles)}</td>
+        <td data-label="หมายเหตุ">${esc(e.note)}</td>
         <td class="actions">
           <button class="icon-btn edit" data-edit="${e.id}">แก้ไข</button>
           <button class="icon-btn del" data-del="${e.id}">ลบ</button>
@@ -469,20 +590,15 @@
     `;
     }).join('');
 
-    const { finalRunning } = chronologicalEntries();
-    const parts = [];
-    if (finalRunning['แพ็ค']) parts.push(`${finalRunning['แพ็ค'].toLocaleString('th-TH')} แพ็ค`);
-    if (finalRunning['ขวด']) parts.push(`${finalRunning['ขวด'].toLocaleString('th-TH')} ขวด`);
-    latestStock.textContent = parts.length ? parts.join(' / ') : '0';
+    const { finalBottles } = chronologicalEntries();
+    latestStock.textContent = formatBottles(finalBottles);
   }
 
   tableBody.addEventListener('click', (e) => {
     const editId = e.target.getAttribute('data-edit');
     const delId = e.target.getAttribute('data-del');
-    const moveId = e.target.getAttribute('data-id');
     if (editId) editEntry(editId);
     if (delId) deleteEntry(delId);
-    if (moveId) move(moveId, parseInt(e.target.getAttribute('data-move'), 10));
   });
 
   function editEntry(id){
@@ -520,10 +636,12 @@
         });
         statusText.textContent = 'เชื่อมต่อแล้ว • อัปเดตล่าสุดแบบเรียลไทม์';
         statusText.classList.remove('err');
+        statusText.classList.add('ok');
         render();
         if (form.classList.contains('open')) updatePreview();
       }, (err) => {
         console.error(err);
+        statusText.classList.remove('ok');
         if (err.code === 'permission-denied'){
           statusText.textContent = 'เชื่อมต่อไม่สำเร็จ: ยังไม่ได้ตั้งค่า Firestore Rules ให้ allow read/write (ดูขั้นตอนใน README.md)';
         } else {
@@ -542,6 +660,7 @@
     e.preventDefault();
     if (!col){
       statusText.textContent = 'ยังเชื่อมต่อฐานข้อมูลไม่ได้ ตรวจสอบ firebase-config.js และ Firestore Rules ก่อน (ดู README.md)';
+      statusText.classList.remove('ok');
       statusText.classList.add('err');
       return;
     }
@@ -589,20 +708,6 @@
       statusText.textContent = 'ลบไม่สำเร็จ: ' + err.message;
       statusText.classList.add('err');
     }
-  }
-
-  async function move(id, dir){
-    if (!col) return;
-    const list = visibleEntries();
-    const idx = list.findIndex(x => x.id === id);
-    const swapIdx = idx + dir;
-    if (idx < 0 || swapIdx < 0 || swapIdx >= list.length) return;
-    const a = allEntries.find(x => x.id === list[idx].id);
-    const b = allEntries.find(x => x.id === list[swapIdx].id);
-    const batch = db.batch();
-    batch.update(col.doc(a.id), { order: b.order });
-    batch.update(col.doc(b.id), { order: a.order });
-    try{ await batch.commit(); } catch(err){ console.error(err); }
   }
 
 })();
