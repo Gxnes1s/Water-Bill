@@ -92,6 +92,35 @@
 
   main{max-width:1080px;margin:0 auto;padding:24px;}
 
+  .size-tabs{
+    display:flex;
+    gap:2px;
+    margin-bottom:18px;
+    border-bottom:2px solid var(--ink-deep);
+  }
+  .size-tabs .tab{
+    background:transparent;
+    color:var(--ink-soft);
+    font-family:'Noto Serif Thai', serif;
+    font-weight:600;
+    font-size:15.5px;
+    padding:10px 22px;
+    border:1px solid var(--paper-line);
+    border-bottom:none;
+    border-radius:2px 2px 0 0;
+    position:relative;
+    top:2px;
+  }
+  .size-tabs .tab.active{
+    background:var(--ink-deep);
+    color:var(--paper);
+    border-color:var(--ink-deep);
+  }
+  .size-tabs .tab:not(.active):hover{
+    background:var(--stamp-soft);
+    color:var(--stamp);
+  }
+
   .toolbar{
     display:flex;
     justify-content:space-between;
@@ -222,15 +251,20 @@
   <div class="title-block">
     <p class="eyebrow">แผนกสวัสดิการ</p>
     <h1>บัญชี รับ – จ่าย น้ำดื่มสวัสดิการ</h1>
-    <p class="subtitle">ขนาดขวด 350 มล. — บันทึกและติดตามยอดคงเหลือแบบเรียลไทม์</p>
+    <p class="subtitle" id="subtitleText">บันทึกและติดตามยอดคงเหลือแบบเรียลไทม์</p>
   </div>
   <div class="stock-plate">
-    <span class="label">ยอดคงเหลือล่าสุด</span>
+    <span class="label" id="stockLabel">คงเหลือ 350 มล.</span>
     <span class="value" id="latestStock">–</span>
   </div>
 </header>
 
 <main>
+  <nav class="size-tabs" id="sizeTabs">
+    <button type="button" class="tab active" data-size="350">ขนาด 350 มล.</button>
+    <button type="button" class="tab" data-size="600">ขนาด 600 มล.</button>
+  </nav>
+
   <div class="toolbar">
     <button class="btn-add" id="toggleFormBtn" type="button">+ เพิ่มรายการ</button>
     <span class="status" id="statusText">กำลังเชื่อมต่อฐานข้อมูล…</span>
@@ -247,15 +281,15 @@
     </div>
     <div class="field">
       <label for="f-in">รับ</label>
-      <input type="text" id="f-in" placeholder="เช่น 120 หรือ 10 แพ็ค">
+      <input type="number" id="f-in" placeholder="0" min="0" step="1">
     </div>
     <div class="field">
       <label for="f-out">เบิก</label>
-      <input type="text" id="f-out" placeholder="เช่น 48">
+      <input type="number" id="f-out" placeholder="0" min="0" step="1">
     </div>
-    <div class="field">
-      <label for="f-remain">คงเหลือ</label>
-      <input type="text" id="f-remain" placeholder="เช่น 312 หรือ 60 แพ็ค 2 ขวด">
+    <div class="field full" id="previewField">
+      <label>คงเหลือ (คำนวณอัตโนมัติ)</label>
+      <div id="remainPreview" style="padding:9px 10px;background:#F1ECDD;border:1px dashed #C9BE9F;font-weight:700;color:var(--ink-deep);">0</div>
     </div>
     <div class="field">
       <label for="f-note">หมายเหตุ</label>
@@ -300,39 +334,49 @@
 (function(){
   "use strict";
 
-  // firebase-config.js must define window.FIREBASE_CONFIG = {...}
-  if (!window.FIREBASE_CONFIG || !window.FIREBASE_CONFIG.apiKey) {
-    document.getElementById('statusText').textContent = 'ยังไม่ได้ตั้งค่า Firebase — ดู README.md';
-    document.getElementById('statusText').classList.add('err');
-    return;
-  }
-
-  firebase.initializeApp(window.FIREBASE_CONFIG);
-  const db = firebase.firestore();
-  const col = db.collection('entries');
-
   const tableBody = document.getElementById('tableBody');
   const statusText = document.getElementById('statusText');
   const latestStock = document.getElementById('latestStock');
+  const stockLabel = document.getElementById('stockLabel');
+  const subtitleText = document.getElementById('subtitleText');
+  const sizeTabs = document.getElementById('sizeTabs');
   const form = document.getElementById('entryForm');
   const toggleFormBtn = document.getElementById('toggleFormBtn');
   const cancelBtn = document.getElementById('cancelBtn');
-
   const fDate = document.getElementById('f-date');
   const fItem = document.getElementById('f-item');
   const fIn = document.getElementById('f-in');
   const fOut = document.getElementById('f-out');
-  const fRemain = document.getElementById('f-remain');
   const fNote = document.getElementById('f-note');
+  const remainPreview = document.getElementById('remainPreview');
 
+  let activeSize = '350';
   let editingId = null;
-  let entries = [];
-  let nextOrder = 1;
+  let allEntries = [];
+  let nextOrder = {}; // per-size counter, e.g. {350: 5, 600: 2}
 
+  function num(v){
+    const n = parseFloat(v);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function visibleEntries(){
+    // returns entries for the active size, each annotated with a computed running balance
+    let running = 0;
+    return allEntries
+      .filter(e => (e.size || '350') === activeSize)
+      .map(e => {
+        running = running + num(e.received) - num(e.withdrawn);
+        return { ...e, remaining: running };
+      });
+  }
+
+  // ---- Form open/close: this must always work, independent of Firebase status ----
   function openForm(editing){
     form.classList.add('open');
     form.classList.toggle('editing', !!editing);
     toggleFormBtn.style.display = 'none';
+    updatePreview();
     fDate.focus();
   }
   function closeForm(){
@@ -340,96 +384,59 @@
     form.reset();
     editingId = null;
     toggleFormBtn.style.display = '';
+    updatePreview();
+  }
+  function updatePreview(){
+    const list = visibleEntries();
+    const base = editingId
+      ? (() => { // if editing, base is the balance right before this entry
+          const idx = list.findIndex(x => x.id === editingId);
+          if (idx <= 0) return 0;
+          return list[idx - 1].remaining;
+        })()
+      : (list.length ? list[list.length - 1].remaining : 0);
+    const preview = base + num(fIn.value) - num(fOut.value);
+    remainPreview.textContent = preview.toLocaleString('th-TH');
   }
 
   toggleFormBtn.addEventListener('click', () => openForm(false));
   cancelBtn.addEventListener('click', closeForm);
+  fIn.addEventListener('input', updatePreview);
+  fOut.addEventListener('input', updatePreview);
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const data = {
-      date: fDate.value.trim(),
-      item: fItem.value.trim(),
-      received: fIn.value.trim(),
-      withdrawn: fOut.value.trim(),
-      remaining: fRemain.value.trim(),
-      note: fNote.value.trim(),
-    };
-    if (!data.item) { fItem.focus(); return; }
-
-    statusText.textContent = 'กำลังบันทึก…';
-    statusText.classList.remove('err');
-    try{
-      if (editingId){
-        await col.doc(editingId).update(data);
-      } else {
-        data.order = nextOrder;
-        data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-        await col.add(data);
-      }
-      closeForm();
-    } catch(err){
-      console.error(err);
-      statusText.textContent = 'บันทึกไม่สำเร็จ: ' + err.message;
-      statusText.classList.add('err');
-    }
+  sizeTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab');
+    if (!btn) return;
+    activeSize = btn.getAttribute('data-size');
+    [...sizeTabs.querySelectorAll('.tab')].forEach(t => t.classList.toggle('active', t === btn));
+    stockLabel.textContent = `คงเหลือ ${activeSize} มล.`;
+    subtitleText.textContent = `ขนาดขวด ${activeSize} มล. — บันทึกและติดตามยอดคงเหลือแบบเรียลไทม์`;
+    closeForm();
+    render();
   });
 
-  async function deleteEntry(id){
-    if (!confirm('ลบรายการนี้หรือไม่?')) return;
-    try{
-      await col.doc(id).delete();
-    } catch(err){
-      statusText.textContent = 'ลบไม่สำเร็จ: ' + err.message;
-      statusText.classList.add('err');
-    }
-  }
-
-  function editEntry(id){
-    const e = entries.find(x => x.id === id);
-    if (!e) return;
-    editingId = id;
-    fDate.value = e.date || '';
-    fItem.value = e.item || '';
-    fIn.value = e.received || '';
-    fOut.value = e.withdrawn || '';
-    fRemain.value = e.remaining || '';
-    fNote.value = e.note || '';
-    openForm(true);
-  }
-
-  async function move(id, dir){
-    const idx = entries.findIndex(x => x.id === id);
-    const swapIdx = idx + dir;
-    if (idx < 0 || swapIdx < 0 || swapIdx >= entries.length) return;
-    const a = entries[idx], b = entries[swapIdx];
-    const batch = db.batch();
-    batch.update(col.doc(a.id), { order: b.order });
-    batch.update(col.doc(b.id), { order: a.order });
-    try{ await batch.commit(); } catch(err){ console.error(err); }
-  }
-
   function esc(s){
-    return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    return (String(s === undefined || s === null ? '' : s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
   function render(){
+    const entries = visibleEntries();
     if (!entries.length){
-      tableBody.innerHTML = '<tr class="empty-row"><td colspan="8">ยังไม่มีรายการ — กด "เพิ่มรายการ" เพื่อเริ่มบันทึก</td></tr>';
-      latestStock.textContent = '–';
+      tableBody.innerHTML = `<tr class="empty-row"><td colspan="8">ยังไม่มีรายการสำหรับขนาด ${activeSize} มล. — กด "เพิ่มรายการ" เพื่อเริ่มบันทึก</td></tr>`;
+      latestStock.textContent = '0';
       return;
     }
     tableBody.innerHTML = entries.map((e, i) => `
-      <tr class="${e.received ? 'received' : ''}">
+      <tr class="${num(e.received) > 0 ? 'received' : ''}">
         <td class="actions" style="text-align:left;">
           <button class="icon-btn move" title="เลื่อนขึ้น" data-move="-1" data-id="${e.id}" ${i===0?'disabled style="opacity:.3"':''}>↑</button
           ><button class="icon-btn move" title="เลื่อนลง" data-move="1" data-id="${e.id}" ${i===entries.length-1?'disabled style="opacity:.3"':''}>↓</button>
         </td>
         <td>${esc(e.date)}</td>
         <td class="item">${esc(e.item)}</td>
-        <td class="num">${esc(e.received)}</td>
-        <td class="num">${esc(e.withdrawn)}</td>
-        <td class="num remaining">${esc(e.remaining)}</td>
+        <td class="num">${num(e.received) ? num(e.received).toLocaleString('th-TH') : ''}</td>
+        <td class="num">${num(e.withdrawn) ? num(e.withdrawn).toLocaleString('th-TH') : ''}</td>
+        <td class="num remaining">${e.remaining.toLocaleString('th-TH')}</td>
         <td>${esc(e.note)}</td>
         <td class="actions">
           <button class="icon-btn edit" data-edit="${e.id}">แก้ไข</button>
@@ -438,8 +445,7 @@
       </tr>
     `).join('');
 
-    const last = entries[entries.length - 1];
-    latestStock.textContent = last.remaining || '–';
+    latestStock.textContent = entries[entries.length - 1].remaining.toLocaleString('th-TH');
   }
 
   tableBody.addEventListener('click', (e) => {
@@ -451,17 +457,123 @@
     if (moveId) move(moveId, parseInt(e.target.getAttribute('data-move'), 10));
   });
 
-  col.orderBy('order', 'asc').onSnapshot((snap) => {
-    entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    nextOrder = entries.reduce((m, e) => Math.max(m, e.order || 0), 0) + 1;
-    statusText.textContent = 'เชื่อมต่อแล้ว • อัปเดตล่าสุดแบบเรียลไทม์';
-    statusText.classList.remove('err');
-    render();
-  }, (err) => {
-    console.error(err);
-    statusText.textContent = 'เชื่อมต่อไม่สำเร็จ: ' + err.message;
+  function editEntry(id){
+    const e = allEntries.find(x => x.id === id);
+    if (!e) return;
+    editingId = id;
+    fDate.value = e.date || '';
+    fItem.value = e.item || '';
+    fIn.value = e.received || '';
+    fOut.value = e.withdrawn || '';
+    fNote.value = e.note || '';
+    openForm(true);
+  }
+
+  // ---- Firebase wiring: guarded so a config/connection problem never disables the form UI above ----
+  let col = null;
+  let db = null;
+
+  if (!window.FIREBASE_CONFIG || !window.FIREBASE_CONFIG.apiKey) {
+    statusText.textContent = 'ยังไม่ได้ตั้งค่า Firebase — ดู README.md (ไฟล์ firebase-config.js หายไปหรือยังไม่มีค่า)';
     statusText.classList.add('err');
+  } else {
+    try{
+      firebase.initializeApp(window.FIREBASE_CONFIG);
+      db = firebase.firestore();
+      col = db.collection('WaterBill');
+
+      col.orderBy('order', 'asc').onSnapshot((snap) => {
+        allEntries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        nextOrder = {};
+        allEntries.forEach(e => {
+          const s = e.size || '350';
+          nextOrder[s] = Math.max(nextOrder[s] || 0, e.order || 0) + 1;
+        });
+        statusText.textContent = 'เชื่อมต่อแล้ว • อัปเดตล่าสุดแบบเรียลไทม์';
+        statusText.classList.remove('err');
+        render();
+        if (form.classList.contains('open')) updatePreview();
+      }, (err) => {
+        console.error(err);
+        if (err.code === 'permission-denied'){
+          statusText.textContent = 'เชื่อมต่อไม่สำเร็จ: ยังไม่ได้ตั้งค่า Firestore Rules ให้ allow read/write (ดูขั้นตอนใน README.md)';
+        } else {
+          statusText.textContent = 'เชื่อมต่อไม่สำเร็จ: ' + err.message;
+        }
+        statusText.classList.add('err');
+      });
+    } catch(err){
+      console.error(err);
+      statusText.textContent = 'ตั้งค่า Firebase ไม่สำเร็จ: ' + err.message;
+      statusText.classList.add('err');
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!col){
+      statusText.textContent = 'ยังเชื่อมต่อฐานข้อมูลไม่ได้ ตรวจสอบ firebase-config.js และ Firestore Rules ก่อน (ดู README.md)';
+      statusText.classList.add('err');
+      return;
+    }
+    const item = fItem.value.trim();
+    if (!item) { fItem.focus(); return; }
+
+    const data = {
+      date: fDate.value.trim(),
+      item: item,
+      received: fIn.value === '' ? 0 : num(fIn.value),
+      withdrawn: fOut.value === '' ? 0 : num(fOut.value),
+      note: fNote.value.trim(),
+    };
+
+    statusText.textContent = 'กำลังบันทึก…';
+    statusText.classList.remove('err');
+    try{
+      if (editingId){
+        await col.doc(editingId).update(data);
+      } else {
+        data.size = activeSize;
+        data.order = nextOrder[activeSize] || 1;
+        data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+        await col.add(data);
+      }
+      closeForm();
+    } catch(err){
+      console.error(err);
+      if (err.code === 'permission-denied'){
+        statusText.textContent = 'บันทึกไม่สำเร็จ: Firestore Rules ยังไม่อนุญาตให้เขียนข้อมูล (ดู README.md)';
+      } else {
+        statusText.textContent = 'บันทึกไม่สำเร็จ: ' + err.message;
+      }
+      statusText.classList.add('err');
+    }
   });
+
+  async function deleteEntry(id){
+    if (!col) return;
+    if (!confirm('ลบรายการนี้หรือไม่?')) return;
+    try{
+      await col.doc(id).delete();
+    } catch(err){
+      statusText.textContent = 'ลบไม่สำเร็จ: ' + err.message;
+      statusText.classList.add('err');
+    }
+  }
+
+  async function move(id, dir){
+    if (!col) return;
+    const list = visibleEntries();
+    const idx = list.findIndex(x => x.id === id);
+    const swapIdx = idx + dir;
+    if (idx < 0 || swapIdx < 0 || swapIdx >= list.length) return;
+    const a = allEntries.find(x => x.id === list[idx].id);
+    const b = allEntries.find(x => x.id === list[swapIdx].id);
+    const batch = db.batch();
+    batch.update(col.doc(a.id), { order: b.order });
+    batch.update(col.doc(b.id), { order: a.order });
+    try{ await batch.commit(); } catch(err){ console.error(err); }
+  }
 
 })();
 </script>
