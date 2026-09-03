@@ -138,7 +138,7 @@
     gap:8px;
     margin-bottom:20px;
   }
-  .size-tabs .tab{
+  .size-tabs .tab, .view-tabs .tab{
     background:var(--card);
     color:var(--ink-soft);
     font-family:'Noto Serif Thai', serif;
@@ -149,15 +149,16 @@
     border-radius:999px;
     transition:background .15s ease, color .15s ease, border-color .15s ease;
   }
-  .size-tabs .tab.active{
+  .size-tabs .tab.active, .view-tabs .tab.active{
     background:var(--navy-900);
     color:var(--gold-300);
     border-color:var(--navy-900);
   }
-  .size-tabs .tab:not(.active):hover{
+  .size-tabs .tab:not(.active):hover, .view-tabs .tab:not(.active):hover{
     border-color:var(--gold-500);
     color:var(--navy-900);
   }
+  .view-tabs{display:flex;gap:8px;margin-bottom:18px;}
 
   /* ---------- Toolbar ---------- */
   .toolbar{
@@ -294,6 +295,84 @@
     font-size:14.5px;
   }
 
+  /* ---------- Dashboard ---------- */
+  .dash-controls{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+  }
+  .segmented{
+    display:inline-flex;
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-radius:999px;
+    padding:3px;
+  }
+  .segmented button{
+    padding:8px 16px;
+    border-radius:999px;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    background:transparent;
+  }
+  .segmented button.active{background:var(--navy-900);color:var(--gold-300);}
+  #periodSelect{
+    font-family:inherit;
+    font-size:14.5px;
+    padding:9px 16px;
+    border:1px solid var(--paper-line);
+    border-radius:999px;
+    background:var(--card);
+    color:var(--ink);
+  }
+  #periodSelect:focus{outline:none;border-color:var(--gold-500);}
+  .dash-summary{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin-bottom:20px;
+  }
+  .dash-card{
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-radius:var(--radius-lg);
+    padding:16px 18px;
+    box-shadow:var(--shadow-card);
+  }
+  .dash-card .label{display:block;font-size:12.5px;color:var(--ink-soft);font-weight:600;margin-bottom:8px;}
+  .dash-card .value{font-family:'Noto Serif Thai', serif;font-size:18.5px;font-weight:700;color:var(--navy-900);line-height:1.3;}
+  .dash-card .value.credit{color:var(--credit);}
+  .dash-card .value.debit{color:var(--debit);}
+  .dash-card.highlight{border-color:var(--gold-500);background:linear-gradient(160deg,#fff,var(--paper));}
+  .dash-card.highlight .value{color:var(--gold-600);}
+  .dash-chart-wrap{
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-radius:var(--radius-lg);
+    padding:20px 18px 14px;
+    box-shadow:var(--shadow-card);
+  }
+  .dash-chart-title{font-family:'Noto Serif Thai', serif;font-weight:600;font-size:15px;color:var(--navy-900);margin-bottom:16px;}
+  .bars{display:flex;align-items:flex-end;gap:6px;height:180px;overflow-x:auto;padding-bottom:6px;}
+  .bar-group{display:flex;flex-direction:column;align-items:center;flex:1 0 18px;min-width:18px;height:100%;}
+  .bar-pair{display:flex;align-items:flex-end;justify-content:center;gap:2px;height:100%;width:100%;}
+  .bar{width:7px;border-radius:3px 3px 0 0;min-height:2px;transition:height .2s ease;}
+  .bar-in{background:linear-gradient(180deg, var(--gold-400), var(--gold-600));}
+  .bar-out{background:linear-gradient(180deg, var(--navy-700), var(--navy-900));}
+  .bar-label{font-size:10.5px;color:var(--ink-faint);margin-top:6px;white-space:nowrap;}
+  .legend{display:flex;gap:16px;margin-top:12px;font-size:12.5px;color:var(--ink-soft);}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend .dot{width:8px;height:8px;border-radius:50%;}
+  .legend .dot.in{background:var(--gold-500);}
+  .legend .dot.out{background:var(--navy-800);}
+  .dash-empty{
+    text-align:center;color:var(--ink-soft);padding:60px 20px;
+    background:var(--card);border:1px solid var(--paper-line);border-radius:var(--radius-lg);
+  }
+
   footer{
     max-width:1100px;
     margin:0 auto;
@@ -342,6 +421,10 @@
     td.actions{justify-content:flex-end;gap:6px;padding-top:10px;}
     td.actions::before{content:none;}
     .icon-btn{padding:7px 12px;background:var(--paper);}
+
+    .dash-summary{grid-template-columns:repeat(2,1fr);}
+    .bars{height:140px;}
+    .bar{width:5px;}
   }
 </style>
 </head>
@@ -374,6 +457,12 @@
     <button type="button" class="tab" data-size="600">ขนาด 600 มล.</button>
   </nav>
 
+  <nav class="view-tabs" id="viewTabs">
+    <button type="button" class="tab" data-view="ledger">บัญชีรายการ</button>
+    <button type="button" class="tab active" data-view="dashboard">แดชบอร์ดสรุปยอด</button>
+  </nav>
+
+  <div id="ledgerView" style="display:none;">
   <div class="toolbar">
     <button class="btn-add" id="toggleFormBtn" type="button">+ เพิ่มรายการ</button>
     <span class="status" id="statusText">กำลังเชื่อมต่อฐานข้อมูล…</span>
@@ -382,7 +471,7 @@
   <form class="entry-form" id="entryForm">
     <div class="field">
       <label for="f-date">วัน/เดือน/ปี</label>
-      <input type="text" id="f-date" placeholder="เช่น 29/5/26">
+      <input type="date" id="f-date">
     </div>
     <div class="field">
       <label for="f-item">รายการ</label>
@@ -437,6 +526,38 @@
     </table>
     </div>
   </div>
+  </div>
+
+  <div id="dashboardView">
+    <div class="dash-controls">
+      <div class="segmented" id="periodTypeTabs">
+        <button type="button" class="active" data-ptype="month">รายเดือน</button>
+        <button type="button" data-ptype="year">รายปี</button>
+      </div>
+      <select id="periodSelect"></select>
+    </div>
+
+    <div id="dashEmpty" class="dash-empty" style="display:none;">
+      ยังไม่มีรายการที่ระบุวันที่ในรูปแบบที่สรุปยอดได้ — เพิ่มรายการพร้อมเลือกวันที่เพื่อดูสรุป
+    </div>
+
+    <div id="dashContent">
+      <div class="dash-summary">
+        <div class="dash-card"><span class="label">ยอดรับรวม</span><span class="value credit" id="dashIn">–</span></div>
+        <div class="dash-card"><span class="label">ยอดเบิกรวม</span><span class="value debit" id="dashOut">–</span></div>
+        <div class="dash-card"><span class="label">คงเหลือต้นงวด</span><span class="value" id="dashOpen">–</span></div>
+        <div class="dash-card highlight"><span class="label">คงเหลือสิ้นงวด</span><span class="value" id="dashClose">–</span></div>
+      </div>
+      <div class="dash-chart-wrap">
+        <div class="dash-chart-title" id="dashChartTitle">รับ–เบิก</div>
+        <div class="bars" id="dashBars"></div>
+        <div class="legend">
+          <span><span class="dot in"></span>รับ</span>
+          <span><span class="dot out"></span>เบิก</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
 
 <footer>
@@ -467,6 +588,20 @@
   const fUnit = document.getElementById('f-unit');
   const fNote = document.getElementById('f-note');
   const remainPreview = document.getElementById('remainPreview');
+
+  const viewTabs = document.getElementById('viewTabs');
+  const ledgerView = document.getElementById('ledgerView');
+  const dashboardView = document.getElementById('dashboardView');
+  const periodTypeTabs = document.getElementById('periodTypeTabs');
+  const periodSelect = document.getElementById('periodSelect');
+  const dashEmpty = document.getElementById('dashEmpty');
+  const dashContent = document.getElementById('dashContent');
+  const dashIn = document.getElementById('dashIn');
+  const dashOut = document.getElementById('dashOut');
+  const dashOpen = document.getElementById('dashOpen');
+  const dashClose = document.getElementById('dashClose');
+  const dashChartTitle = document.getElementById('dashChartTitle');
+  const dashBars = document.getElementById('dashBars');
 
   let activeSize = '350';
   let editingId = null;
@@ -520,6 +655,47 @@
     return idx > 0 ? ascList[idx - 1].remainingBottles : 0;
   }
 
+  // ---------- Dates ----------
+  // New entries are saved from <input type="date"> as "yyyy-mm-dd". Older entries
+  // recorded before the dashboard existed may hold free-text like "29/5/26" — this
+  // parses both so the dashboard can summarize every record it possibly can.
+  const thMonthsFull = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  const thMonthsShort = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+  function parseEntryDate(str){
+    if (!str) return null;
+    str = String(str).trim();
+    let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(str);
+    if (m){
+      const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+      return isNaN(d) ? null : d;
+    }
+    m = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/.exec(str);
+    if (m){
+      let day = Number(m[1]), mon = Number(m[2]), yr = Number(m[3]);
+      if (yr < 100) yr += 2000; // legacy shorthand, e.g. "26" -> 2026
+      if (mon < 1 || mon > 12 || day < 1 || day > 31) return null;
+      const d = new Date(yr, mon - 1, day);
+      return isNaN(d) ? null : d;
+    }
+    return null;
+  }
+
+  function toDateInputValue(d){
+    if (!d) return '';
+    const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${dd}`;
+  }
+
+  function formatDateDisplay(str){
+    const d = parseEntryDate(str);
+    if (!d) return esc(str);
+    return `${d.getDate()} ${thMonthsShort[d.getMonth()]} ${d.getFullYear() + 543}`;
+  }
+
+  function monthKey(d){ return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; }
+  function yearKey(d){ return `${d.getFullYear()}`; }
+
   // ---- Form open/close: this must always work, independent of Firebase status ----
   function openForm(editing){
     form.classList.add('open');
@@ -559,10 +735,127 @@
     subtitleText.textContent = `ขนาดขวด ${activeSize} มล. — บันทึกและติดตามยอดคงเหลือแบบเรียลไทม์`;
     closeForm();
     render();
+    if (activeView === 'dashboard') renderDashboard();
   });
 
   function esc(s){
     return (String(s === undefined || s === null ? '' : s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------- View switch: บัญชีรายการ <-> แดชบอร์ด ----------
+  let activeView = 'dashboard';
+  viewTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab');
+    if (!btn) return;
+    activeView = btn.getAttribute('data-view');
+    [...viewTabs.querySelectorAll('.tab')].forEach(t => t.classList.toggle('active', t === btn));
+    ledgerView.style.display = activeView === 'ledger' ? '' : 'none';
+    dashboardView.style.display = activeView === 'dashboard' ? '' : 'none';
+    if (activeView === 'dashboard') renderDashboard();
+  });
+
+  // ---------- Dashboard: รายเดือน / รายปี ----------
+  let periodType = 'month';
+  let selectedPeriod = null;
+
+  periodTypeTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    periodType = btn.getAttribute('data-ptype');
+    [...periodTypeTabs.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b === btn));
+    selectedPeriod = null; // let renderDashboard pick the most recent period of the new type
+    renderDashboard();
+  });
+
+  periodSelect.addEventListener('change', () => {
+    selectedPeriod = periodSelect.value;
+    renderDashboard();
+  });
+
+  function periodLabel(key){
+    if (periodType === 'month'){
+      const [y, m] = key.split('-').map(Number);
+      return `${thMonthsFull[m - 1]} ${y + 543}`;
+    }
+    return `พ.ศ. ${Number(key) + 543}`;
+  }
+
+  function renderDashboard(){
+    const { list } = chronologicalEntries(); // ascending, already filtered by activeSize
+    const dated = list
+      .map((e, i) => ({ ...e, _idx: i, _date: parseEntryDate(e.date) }))
+      .filter(e => e._date);
+
+    if (!dated.length){
+      dashEmpty.style.display = '';
+      dashContent.style.display = 'none';
+      periodSelect.innerHTML = '';
+      periodSelect.disabled = true;
+      return;
+    }
+    dashEmpty.style.display = 'none';
+    dashContent.style.display = '';
+    periodSelect.disabled = false;
+
+    const keyOf = e => periodType === 'month' ? monthKey(e._date) : yearKey(e._date);
+    const keys = [...new Set(dated.map(keyOf))].sort().reverse();
+    if (!selectedPeriod || !keys.includes(selectedPeriod)) selectedPeriod = keys[0];
+
+    periodSelect.innerHTML = keys.map(k =>
+      `<option value="${k}" ${k === selectedPeriod ? 'selected' : ''}>${periodLabel(k)}</option>`
+    ).join('');
+
+    const inPeriod = dated.filter(e => keyOf(e) === selectedPeriod);
+    const idxs = inPeriod.map(e => e._idx);
+    const firstIdx = Math.min(...idxs);
+    const lastIdx = Math.max(...idxs);
+
+    let totalIn = 0, totalOut = 0;
+    inPeriod.forEach(e => {
+      const unit = e.unit || 'แพ็ค';
+      totalIn += toBottles(e.received, unit);
+      totalOut += toBottles(e.withdrawn, unit);
+    });
+
+    dashIn.textContent = formatBottles(totalIn);
+    dashOut.textContent = formatBottles(totalOut);
+    dashOpen.textContent = formatBottles(baseBeforeIndex(list, firstIdx));
+    dashClose.textContent = formatBottles(list[lastIdx].remainingBottles);
+
+    let bars;
+    if (periodType === 'month'){
+      const [y, m] = selectedPeriod.split('-').map(Number);
+      const daysInMonth = new Date(y, m, 0).getDate();
+      bars = Array.from({ length: daysInMonth }, (_, i) => ({ label: String(i + 1), in: 0, out: 0 }));
+      inPeriod.forEach(e => {
+        const day = e._date.getDate();
+        const unit = e.unit || 'แพ็ค';
+        bars[day - 1].in += toBottles(e.received, unit);
+        bars[day - 1].out += toBottles(e.withdrawn, unit);
+      });
+      dashChartTitle.textContent = `รับ–เบิก รายวัน — ${periodLabel(selectedPeriod)}`;
+    } else {
+      bars = thMonthsShort.map(label => ({ label, in: 0, out: 0 }));
+      inPeriod.forEach(e => {
+        const unit = e.unit || 'แพ็ค';
+        bars[e._date.getMonth()].in += toBottles(e.received, unit);
+        bars[e._date.getMonth()].out += toBottles(e.withdrawn, unit);
+      });
+      dashChartTitle.textContent = `รับ–เบิก รายเดือน — ${periodLabel(selectedPeriod)}`;
+    }
+
+    const maxVal = Math.max(1, ...bars.map(b => Math.max(b.in, b.out)));
+    dashBars.innerHTML = bars.map((b, i) => {
+      const showLabel = periodType === 'year' || i === 0 || i === bars.length - 1 || (i + 1) % 5 === 0;
+      return `
+      <div class="bar-group">
+        <div class="bar-pair" title="${esc(b.label)}: รับ ${formatBottles(b.in)} / เบิก ${formatBottles(b.out)}">
+          <div class="bar bar-in" style="height:${(b.in / maxVal * 100).toFixed(1)}%"></div>
+          <div class="bar bar-out" style="height:${(b.out / maxVal * 100).toFixed(1)}%"></div>
+        </div>
+        <span class="bar-label">${showLabel ? esc(b.label) : ''}</span>
+      </div>`;
+    }).join('');
   }
 
   function render(){
@@ -576,7 +869,7 @@
       const unit = e.unit || 'แพ็ค';
       return `
       <tr class="${num(e.received) > 0 ? 'received' : ''}">
-        <td data-label="วัน/ด/ป">${esc(e.date)}</td>
+        <td data-label="วัน/ด/ป">${formatDateDisplay(e.date)}</td>
         <td class="item" data-label="รายการ">${esc(e.item)}</td>
         <td class="num received-cell" data-label="รับ">${num(e.received) ? num(e.received).toLocaleString('th-TH') + ' ' + esc(unit) : ''}</td>
         <td class="num withdrawn-cell" data-label="เบิก">${num(e.withdrawn) ? num(e.withdrawn).toLocaleString('th-TH') + ' ' + esc(unit) : ''}</td>
@@ -605,7 +898,7 @@
     const e = allEntries.find(x => x.id === id);
     if (!e) return;
     editingId = id;
-    fDate.value = e.date || '';
+    fDate.value = toDateInputValue(parseEntryDate(e.date));
     fItem.value = e.item || '';
     fIn.value = e.received || '';
     fOut.value = e.withdrawn || '';
@@ -639,6 +932,7 @@
         statusText.classList.add('ok');
         render();
         if (form.classList.contains('open')) updatePreview();
+        if (activeView === 'dashboard') renderDashboard();
       }, (err) => {
         console.error(err);
         statusText.classList.remove('ok');
