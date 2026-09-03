@@ -447,6 +447,9 @@
   .fs-title .t1{font-family:'Noto Serif Thai', serif;font-weight:700;font-size:19px;color:var(--navy-900);}
   .fs-title .t2{font-family:'Noto Serif Thai', serif;font-weight:700;font-size:17px;color:var(--navy-900);}
   .fs-row{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
+  .fs-date-block{margin-bottom:2px;}
+  .fs-date-line1{text-align:right;}
+  .fs-date-line2{text-align:center;}
   .fs-para{margin:2px 0;}
   .fs-center{text-align:center;margin:14px 0;}
   .blank{
@@ -738,13 +741,15 @@
           <div class="t2">วิทยาลัยเทคนิคศรีสะเกษ</div>
         </div>
 
-        <div class="fs-row">
-          <div>เรียน&nbsp; ผู้อำนวยการวิทยาลัยเทคนิคศรีสะเกษ</div>
-          <div>วันที่ <input class="blank xs" type="text" id="rf-day" placeholder="วว"> เดือน <input class="blank md" type="text" id="rf-month" placeholder="เดือน"> พ.ศ. <input class="blank sm" type="text" id="rf-year" placeholder="ปปปป"></div>
+        <div class="fs-date-block">
+          <div class="fs-date-line1">วันที่ <input class="blank xs" type="text" id="rf-day" placeholder="วว"></div>
+          <div class="fs-date-line2">เดือน <input class="blank md" type="text" id="rf-month" placeholder="เดือน"> พ.ศ. <input class="blank sm" type="text" id="rf-year" placeholder="ปปปป"></div>
         </div>
+        <div class="fs-para">เรียน&nbsp; ผู้อำนวยการวิทยาลัยเทคนิคศรีสะเกษ</div>
         <div class="fs-para">เรื่อง&nbsp; ขอใช้น้ำสวัสดิการวิทยาลัยเทคนิคศรีสะเกษ</div>
 
-        <div class="fs-para">ข้าพเจ้า <input class="blank lg" type="text" id="rf-name" placeholder="ชื่อ-สกุล"> ตำแหน่ง <input class="blank lg" type="text" id="rf-position" placeholder="ตำแหน่ง"></div>
+        <div class="fs-para">ข้าพเจ้า <input class="blank xl" type="text" id="rf-name" placeholder="ชื่อ-สกุล"></div>
+        <div class="fs-para">ตำแหน่ง <input class="blank xl" type="text" id="rf-position" placeholder="ตำแหน่ง"></div>
         <div class="fs-para">มีความประสงค์ขอใช้น้ำสวัสดิการวิทยาลัยเทคนิคศรีสะเกษ เพื่อใช้ในโครงการ <input class="blank xl" type="text" id="rf-project" placeholder="ชื่อโครงการ/กิจกรรม"></div>
         <div class="fs-para">ในวัน <input class="blank sm" type="text" id="rf-eventday-name" placeholder="วันที่..."> ที่ <input class="blank xs" type="text" id="rf-eventday" placeholder="วว"> เดือน <input class="blank md" type="text" id="rf-eventmonth" placeholder="เดือน"> พ.ศ. <input class="blank sm" type="text" id="rf-eventyear" placeholder="ปปปป"></div>
 
@@ -784,7 +789,7 @@
             <div class="opt-row"><input type="checkbox" id="rf-store-600"> น้ำดื่มขนาด 600 มล. ขอใช้ <b id="rf-store-600-qty">0</b> ขวด / คงเหลือ <b id="rf-store-600-remain">0</b> ขวด</div>
             <div class="sign-area">
               (ลงชื่อ)........................................
-              <div class="name-line">( นายสันติรักษ์ โตรัสมี )</div>
+              <div class="name-line">( นายสันติรักษ์ โตรัศมี )</div>
               <div>หัวหน้างานพัสดุ</div>
             </div>
             <div class="date-slashes">............./............./.............</div>
