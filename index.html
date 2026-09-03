@@ -418,6 +418,96 @@
     text-align:center;
   }
 
+  /* ---------- Request form (บันทึกขอใช้น้ำสวัสดิการ) ---------- */
+  .rf-toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .rf-toolbar .toolbar-utils{display:flex;gap:8px;flex-wrap:wrap;}
+  .rf-hint{font-size:13px;color:var(--ink-soft);}
+
+  .form-sheet-wrap{
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-card);
+    padding:34px 40px;
+  }
+  .form-sheet{
+    font-family:'Noto Sans Thai', sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    line-height:2.1;
+  }
+  .fs-title{text-align:center;margin-bottom:14px;}
+  .fs-title .t1{font-family:'Noto Serif Thai', serif;font-weight:700;font-size:19px;color:var(--navy-900);}
+  .fs-title .t2{font-family:'Noto Serif Thai', serif;font-weight:700;font-size:17px;color:var(--navy-900);}
+  .fs-row{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
+  .fs-para{margin:2px 0;}
+  .fs-center{text-align:center;margin:14px 0;}
+  .blank{
+    font-family:inherit;
+    font-size:15px;
+    color:var(--ink);
+    border:none;
+    border-bottom:1px dotted var(--ink-faint);
+    background:transparent;
+    padding:2px 4px;
+    text-align:center;
+  }
+  .blank:focus{outline:none;border-bottom:1px solid var(--gold-500);}
+  .blank.xs{width:44px;}
+  .blank.sm{width:64px;}
+  .blank.md{width:120px;}
+  .blank.lg{width:220px;}
+  .blank.xl{width:340px;}
+  .blank.num{text-align:right;}
+  .fs-check-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+    margin:4px 0;
+  }
+  .fs-check-row label{display:flex;align-items:center;gap:8px;}
+  .fs-check-row input[type="checkbox"]{width:16px;height:16px;accent-color:var(--navy-900);}
+  .fs-stock{font-size:12.5px;color:var(--ink-soft);}
+  .fs-sign{margin-top:24px;text-align:right;}
+  .fs-sign .line{margin:2px 0;}
+  .fs-sign .role{text-align:center;}
+
+  .fs-grid{
+    margin-top:26px;
+    border:1px solid var(--paper-line);
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+  .fs-cell{
+    border:1px solid var(--paper-line);
+    padding:16px 18px;
+    text-align:center;
+    line-height:1.9;
+  }
+  .fs-cell .role-title{font-family:'Noto Serif Thai', serif;font-weight:600;font-size:15.5px;color:var(--navy-900);margin-bottom:8px;}
+  .fs-cell .role-title.editable{display:inline-flex;align-items:center;gap:4px;}
+  .fs-cell .opt-row{display:flex;align-items:center;gap:8px;justify-content:flex-start;margin:2px 0;flex-wrap:wrap;font-size:14px;}
+  .fs-cell .opt-row input[type="checkbox"]{width:15px;height:15px;accent-color:var(--navy-900);}
+  .fs-cell .sign-area{margin-top:14px;}
+  .fs-cell .name-line{font-weight:600;margin-top:2px;}
+  .fs-cell .name-line .blank{font-weight:600;}
+  .fs-cell .date-slashes{margin-top:10px;color:var(--ink-soft);}
+
+  @media (max-width:700px){
+    .form-sheet-wrap{padding:20px 16px;}
+    .fs-grid{grid-template-columns:1fr;}
+    .form-sheet{font-size:14px;}
+    .blank.xl{width:100%;}
+  }
+
   /* ---------- Responsive: card-table for small screens ---------- */
   @media (max-width:700px){
     header{padding:28px 18px 22px;}
@@ -475,6 +565,14 @@
     .table-wrap{box-shadow:none;border:1px solid #ccc;border-radius:0;}
     thead th{background:#0C1F3E !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   }
+  body.printing-request main > *:not(#requestFormView){display:none !important;}
+  body.printing-request .rf-toolbar{display:none !important;}
+  body.printing-request .form-sheet-wrap{box-shadow:none;border:none;padding:0;}
+  body.printing-request .blank{border-bottom:1px solid #999;}
+  @media print{
+    body.printing-request header, body.printing-request .view-tabs, body.printing-request footer{display:none !important;}
+    body.printing-request main{padding:14px 6px;}
+  }
 </style>
 </head>
 <body>
@@ -503,7 +601,8 @@
 <main>
   <nav class="view-tabs" id="viewTabs">
     <button type="button" class="tab" data-view="ledger">บัญชีรายการ</button>
-    <button type="button" class="tab active" data-view="dashboard">แดชบอร์ดสรุปยอด</button>
+    <button type="button" class="tab active" data-view="dashboard">สรุปยอดการเบิกน้ำ</button>
+    <button type="button" class="tab" data-view="requestForm">แบบฟอร์มขอใช้น้ำ</button>
   </nav>
 
   <div id="ledgerView" style="display:none;">
@@ -620,6 +719,103 @@
       </div>
     </div>
   </div>
+
+  <div id="requestFormView" style="display:none;">
+    <div class="rf-toolbar">
+      <span class="rf-hint">กรอกแบบฟอร์มตามเอกสารต้นฉบับ — ยอดขอใช้จะถูกเพิ่มเข้าบัญชี 350/600 มล. ให้อัตโนมัติเมื่อกด "บันทึกและเพิ่มเข้าบัญชี"</span>
+      <div class="toolbar-utils">
+        <button class="btn-util" id="rfResetBtn" type="button">↺ ล้างฟอร์ม</button>
+        <button class="btn-util" id="rfPrintBtn" type="button">⇩ พิมพ์แบบฟอร์ม</button>
+        <button class="btn-add" id="rfSaveBtn" type="button">✓ บันทึกและเพิ่มเข้าบัญชี</button>
+      </div>
+    </div>
+    <span class="status" id="rfStatusText" style="display:block;margin-bottom:14px;"></span>
+
+    <div class="form-sheet-wrap">
+      <div class="form-sheet" id="formSheet">
+        <div class="fs-title">
+          <div class="t1">บันทึกขอใช้น้ำสวัสดิการ</div>
+          <div class="t2">วิทยาลัยเทคนิคศรีสะเกษ</div>
+        </div>
+
+        <div class="fs-row">
+          <div>เรียน&nbsp; ผู้อำนวยการวิทยาลัยเทคนิคศรีสะเกษ</div>
+          <div>วันที่ <input class="blank xs" type="text" id="rf-day" placeholder="วว"> เดือน <input class="blank md" type="text" id="rf-month" placeholder="เดือน"> พ.ศ. <input class="blank sm" type="text" id="rf-year" placeholder="ปปปป"></div>
+        </div>
+        <div class="fs-para">เรื่อง&nbsp; ขอใช้น้ำสวัสดิการวิทยาลัยเทคนิคศรีสะเกษ</div>
+
+        <div class="fs-para">ข้าพเจ้า <input class="blank lg" type="text" id="rf-name" placeholder="ชื่อ-สกุล"> ตำแหน่ง <input class="blank lg" type="text" id="rf-position" placeholder="ตำแหน่ง"></div>
+        <div class="fs-para">มีความประสงค์ขอใช้น้ำสวัสดิการวิทยาลัยเทคนิคศรีสะเกษ เพื่อใช้ในโครงการ <input class="blank xl" type="text" id="rf-project" placeholder="ชื่อโครงการ/กิจกรรม"></div>
+        <div class="fs-para">ในวัน <input class="blank sm" type="text" id="rf-eventday-name" placeholder="วันที่..."> ที่ <input class="blank xs" type="text" id="rf-eventday" placeholder="วว"> เดือน <input class="blank md" type="text" id="rf-eventmonth" placeholder="เดือน"> พ.ศ. <input class="blank sm" type="text" id="rf-eventyear" placeholder="ปปปป"></div>
+
+        <div class="fs-check-row">
+          <label><input type="checkbox" id="rf-350-check"> ขนาด 350 มล. จำนวน <input class="blank sm num" type="number" id="rf-350-qty" min="0" step="1" placeholder="0"> ขวด</label>
+          <span class="fs-stock" id="rf-350-stock">คงเหลือปัจจุบัน: –</span>
+        </div>
+        <div class="fs-check-row">
+          <label><input type="checkbox" id="rf-600-check"> ขนาด 600 มล. จำนวน <input class="blank sm num" type="number" id="rf-600-qty" min="0" step="1" placeholder="0"> ขวด</label>
+          <span class="fs-stock" id="rf-600-stock">คงเหลือปัจจุบัน: –</span>
+        </div>
+
+        <div class="fs-center">จึงเรียนมาเพื่อพิจารณา</div>
+
+        <div class="fs-sign">
+          <div class="line">(ลงชื่อ) <input class="blank md" type="text" id="rf-sign1"> ผู้ขอใช้</div>
+          <div class="line role">( <input class="blank lg" type="text" id="rf-sign1name" placeholder="ชื่อ-สกุลผู้ขอใช้"> )</div>
+          <div class="line role">ตำแหน่ง <input class="blank lg" type="text" id="rf-position2" placeholder="ตำแหน่ง"></div>
+        </div>
+
+        <div class="fs-grid">
+          <div class="fs-cell">
+            <div class="role-title editable">รองฝ่าย <input class="blank md" type="text" id="rf-vp1-title" placeholder="ระบุฝ่าย"></div>
+            <div class="opt-row"><input type="checkbox" id="rf-vp1-approve"> อนุมัติ</div>
+            <div class="opt-row"><input type="checkbox" id="rf-vp1-deny"> ไม่อนุมัติ <input class="blank md" type="text" id="rf-vp1-reason" placeholder="เหตุผล (ถ้ามี)"></div>
+            <div class="sign-area">
+              (ลงชื่อ)........................................
+              <div class="name-line">( <input class="blank lg" type="text" id="rf-vp1-name" placeholder="ชื่อ-สกุล"> )</div>
+              <div>รองฝ่าย <input class="blank md" type="text" id="rf-vp1-title2" placeholder="ระบุฝ่าย"></div>
+            </div>
+            <div class="date-slashes">............./............./.............</div>
+          </div>
+
+          <div class="fs-cell">
+            <div class="role-title">หัวหน้างานพัสดุ</div>
+            <div class="opt-row"><input type="checkbox" id="rf-store-350"> น้ำดื่มขนาด 350 มล. ขอใช้ <b id="rf-store-350-qty">0</b> ขวด / คงเหลือ <b id="rf-store-350-remain">0</b> ขวด</div>
+            <div class="opt-row"><input type="checkbox" id="rf-store-600"> น้ำดื่มขนาด 600 มล. ขอใช้ <b id="rf-store-600-qty">0</b> ขวด / คงเหลือ <b id="rf-store-600-remain">0</b> ขวด</div>
+            <div class="sign-area">
+              (ลงชื่อ)........................................
+              <div class="name-line">( นายสันติรักษ์ โตรัสมี )</div>
+              <div>หัวหน้างานพัสดุ</div>
+            </div>
+            <div class="date-slashes">............./............./.............</div>
+          </div>
+
+          <div class="fs-cell">
+            <div class="role-title">รองฝ่ายบริหารทรัพยากร</div>
+            <div class="opt-row"><input type="checkbox" id="rf-vp2-approve"> อนุมัติ</div>
+            <div class="opt-row"><input type="checkbox" id="rf-vp2-deny"> ไม่อนุมัติ <input class="blank md" type="text" id="rf-vp2-reason" placeholder="เหตุผล (ถ้ามี)"></div>
+            <div class="sign-area">
+              (ลงชื่อ)........................................
+              <div class="name-line">( นายวุฒิพงษ์ สมใจ )</div>
+              <div>รองฝ่ายบริหารทรัพยากร</div>
+            </div>
+            <div class="date-slashes">............./............./.............</div>
+          </div>
+
+          <div class="fs-cell">
+            <div class="role-title">ผู้อำนวยการ</div>
+            <div class="opt-row"><input type="checkbox" id="rf-dir-approve"> อนุมัติ</div>
+            <div class="opt-row"><input type="checkbox" id="rf-dir-deny"> ไม่อนุมัติ <input class="blank md" type="text" id="rf-dir-reason" placeholder="เหตุผล (ถ้ามี)"></div>
+            <div class="sign-area">
+              (ลงชื่อ)........................................
+              <div class="name-line">( นายนิรันดร์ สมมุติ )</div>
+              <div>ผู้อำนวยการวิทยาลัยเทคนิคศรีสะเกษ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
 
 <footer>
@@ -663,6 +859,7 @@
   const viewTabs = document.getElementById('viewTabs');
   const ledgerView = document.getElementById('ledgerView');
   const dashboardView = document.getElementById('dashboardView');
+  const requestFormView = document.getElementById('requestFormView');
   const periodTypeTabs = document.getElementById('periodTypeTabs');
   const periodSelect = document.getElementById('periodSelect');
   const dashEmpty = document.getElementById('dashEmpty');
@@ -820,7 +1017,9 @@
     [...viewTabs.querySelectorAll('.tab')].forEach(t => t.classList.toggle('active', t === btn));
     ledgerView.style.display = activeView === 'ledger' ? '' : 'none';
     dashboardView.style.display = activeView === 'dashboard' ? '' : 'none';
+    requestFormView.style.display = activeView === 'requestForm' ? '' : 'none';
     if (activeView === 'dashboard') renderDashboard();
+    if (activeView === 'requestForm') refreshRequestFormStock();
   });
 
   // ---------- Dashboard: รายเดือน / รายปี ----------
@@ -1049,6 +1248,158 @@
     openForm(true);
   }
 
+  // ---------- แบบฟอร์มขอใช้น้ำสวัสดิการ (fillable + auto ledger entry + print) ----------
+  const rfStatusText = document.getElementById('rfStatusText');
+  const rfDay = document.getElementById('rf-day');
+  const rfMonth = document.getElementById('rf-month');
+  const rfYear = document.getElementById('rf-year');
+  const rfName = document.getElementById('rf-name');
+  const rfPosition = document.getElementById('rf-position');
+  const rfProject = document.getElementById('rf-project');
+  const rfEventDayName = document.getElementById('rf-eventday-name');
+  const rfEventDay = document.getElementById('rf-eventday');
+  const rfEventMonth = document.getElementById('rf-eventmonth');
+  const rfEventYear = document.getElementById('rf-eventyear');
+  const rf350Check = document.getElementById('rf-350-check');
+  const rf350Qty = document.getElementById('rf-350-qty');
+  const rf350Stock = document.getElementById('rf-350-stock');
+  const rf600Check = document.getElementById('rf-600-check');
+  const rf600Qty = document.getElementById('rf-600-qty');
+  const rf600Stock = document.getElementById('rf-600-stock');
+  const rfSign1Name = document.getElementById('rf-sign1name');
+  const rfPosition2 = document.getElementById('rf-position2');
+  const rfStore350 = document.getElementById('rf-store-350');
+  const rfStore350Qty = document.getElementById('rf-store-350-qty');
+  const rfStore350Remain = document.getElementById('rf-store-350-remain');
+  const rfStore600 = document.getElementById('rf-store-600');
+  const rfStore600Qty = document.getElementById('rf-store-600-qty');
+  const rfStore600Remain = document.getElementById('rf-store-600-remain');
+  const rfResetBtn = document.getElementById('rfResetBtn');
+  const rfPrintBtn = document.getElementById('rfPrintBtn');
+  const rfSaveBtn = document.getElementById('rfSaveBtn');
+
+  // ชื่อ/ตำแหน่งกรอกครั้งเดียว ใช้ซ้ำได้ทั้งบรรทัดขอใช้และบรรทัดลงชื่อ
+  rfName.addEventListener('input', () => { rfSign1Name.value = rfName.value; });
+  rfPosition.addEventListener('input', () => { rfPosition2.value = rfPosition.value; });
+
+  // เติมวันที่ปัจจุบันให้อัตโนมัติเมื่อยังไม่ได้กรอก
+  function rfPrefillDateIfEmpty(){
+    if (!rfDay.value && !rfMonth.value && !rfYear.value){
+      const d = new Date();
+      rfDay.value = d.getDate();
+      rfMonth.value = thMonthsFull[d.getMonth()];
+      rfYear.value = d.getFullYear() + 543;
+    }
+  }
+
+  // ---- Auto: แสดงยอดคงเหลือปัจจุบันของแต่ละขนาด และคำนวณ "คงเหลือหลังเบิก" แบบเรียลไทม์ ----
+  function refreshRequestFormStock(){
+    rfPrefillDateIfEmpty();
+    const stock350 = chronologicalEntries('350').finalBottles;
+    const stock600 = chronologicalEntries('600').finalBottles;
+    rf350Stock.textContent = `คงเหลือปัจจุบัน: ${formatBottles(stock350)}`;
+    rf600Stock.textContent = `คงเหลือปัจจุบัน: ${formatBottles(stock600)}`;
+    rfUpdateStoreQuadrant(stock350, stock600);
+  }
+
+  function rfUpdateStoreQuadrant(stock350, stock600){
+    if (stock350 === undefined) stock350 = chronologicalEntries('350').finalBottles;
+    if (stock600 === undefined) stock600 = chronologicalEntries('600').finalBottles;
+    const q350 = num(rf350Qty.value);
+    const q600 = num(rf600Qty.value);
+    rfStore350Qty.textContent = q350 ? q350.toLocaleString('th-TH') : '0';
+    rfStore600Qty.textContent = q600 ? q600.toLocaleString('th-TH') : '0';
+    rfStore350Remain.textContent = formatBottles(stock350 - q350);
+    rfStore600Remain.textContent = formatBottles(stock600 - q600);
+    rfStore350.checked = q350 > 0;
+    rfStore600.checked = q600 > 0;
+  }
+
+  [rf350Qty, rf600Qty].forEach(inp => inp.addEventListener('input', () => rfUpdateStoreQuadrant()));
+  rf350Qty.addEventListener('input', () => { rf350Check.checked = num(rf350Qty.value) > 0; });
+  rf600Qty.addEventListener('input', () => { rf600Check.checked = num(rf600Qty.value) > 0; });
+  rf350Check.addEventListener('change', () => { if (!rf350Check.checked) rf350Qty.value = ''; rfUpdateStoreQuadrant(); });
+  rf600Check.addEventListener('change', () => { if (!rf600Check.checked) rf600Qty.value = ''; rfUpdateStoreQuadrant(); });
+
+  function rfSetStatus(msg, ok){
+    rfStatusText.textContent = msg;
+    rfStatusText.classList.toggle('ok', !!ok);
+    rfStatusText.classList.toggle('err', ok === false);
+  }
+
+  rfResetBtn.addEventListener('click', () => {
+    [rfDay, rfMonth, rfYear, rfName, rfPosition, rfProject, rfEventDayName, rfEventDay, rfEventMonth, rfEventYear,
+     rf350Qty, rf600Qty, rfSign1Name, rfPosition2].forEach(el => el.value = '');
+    rf350Check.checked = false;
+    rf600Check.checked = false;
+    document.querySelectorAll('#requestFormView .fs-grid input[type="checkbox"], #requestFormView .fs-grid input[type="text"]').forEach(el => {
+      if (el.type === 'checkbox') el.checked = false; else el.value = '';
+    });
+    rfSetStatus('');
+    refreshRequestFormStock();
+  });
+
+  rfPrintBtn.addEventListener('click', () => {
+    if (activeView !== 'requestForm'){
+      viewTabs.querySelector('[data-view="requestForm"]').click();
+    }
+    rfPrefillDateIfEmpty();
+    document.body.classList.add('printing-request');
+    setTimeout(() => window.print(), 60);
+  });
+  window.addEventListener('afterprint', () => document.body.classList.remove('printing-request'));
+
+  // ---- Auto: กด "บันทึกและเพิ่มเข้าบัญชี" แล้วสร้างรายการ "เบิก" ในบัญชี 350/600 มล. ให้อัตโนมัติ ----
+  rfSaveBtn.addEventListener('click', async () => {
+    const q350 = num(rf350Qty.value);
+    const q600 = num(rf600Qty.value);
+    if (q350 <= 0 && q600 <= 0){
+      rfSetStatus('กรุณาระบุจำนวนขวดที่ขอใช้อย่างน้อย 1 ขนาด', false);
+      return;
+    }
+    if (!col){
+      rfSetStatus('ยังเชื่อมต่อฐานข้อมูลไม่ได้ ตรวจสอบ firebase-config.js และ Firestore Rules ก่อน (ดู README.md)', false);
+      return;
+    }
+    rfPrefillDateIfEmpty();
+    const today = toDateInputValue(new Date());
+    const requester = rfName.value.trim() || rfSign1Name.value.trim();
+    const project = rfProject.value.trim();
+    const itemLabel = `เบิกตามใบขอใช้น้ำสวัสดิการ${project ? ' - โครงการ' + project : ''}`;
+    const noteParts = [];
+    if (requester) noteParts.push('ผู้ขอใช้: ' + requester);
+    if (rfPosition.value.trim()) noteParts.push('ตำแหน่ง: ' + rfPosition.value.trim());
+    const note = noteParts.join(' • ');
+
+    rfSetStatus('กำลังบันทึก…');
+    try{
+      const jobs = [];
+      if (q350 > 0){
+        jobs.push(col.add({
+          date: today, item: itemLabel, received: 0, withdrawn: q350, unit: 'ขวด', note,
+          size: '350', order: nextOrder['350'] || 1,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }));
+      }
+      if (q600 > 0){
+        jobs.push(col.add({
+          date: today, item: itemLabel, received: 0, withdrawn: q600, unit: 'ขวด', note,
+          size: '600', order: nextOrder['600'] || 1,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }));
+      }
+      await Promise.all(jobs);
+      rfSetStatus('บันทึกสำเร็จ — เพิ่มยอดเบิกเข้าบัญชีแล้ว', true);
+    } catch(err){
+      console.error(err);
+      if (err.code === 'permission-denied'){
+        rfSetStatus('บันทึกไม่สำเร็จ: Firestore Rules ยังไม่อนุญาตให้เขียนข้อมูล (ดู README.md)', false);
+      } else {
+        rfSetStatus('บันทึกไม่สำเร็จ: ' + err.message, false);
+      }
+    }
+  });
+
   // ---- Firebase wiring: guarded so a config/connection problem never disables the form UI above ----
   let col = null;
   let db = null;
@@ -1075,6 +1426,7 @@
         render();
         if (form.classList.contains('open')) updatePreview();
         if (activeView === 'dashboard') renderDashboard();
+        if (activeView === 'requestForm') refreshRequestFormStock();
       }, (err) => {
         console.error(err);
         statusText.classList.remove('ok');
