@@ -199,6 +199,21 @@
   }
   .btn-add:hover{filter:brightness(1.05);}
   .btn-add:active{transform:translateY(1px);}
+  .toolbar-utils{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn-util{
+    background:var(--card);
+    color:var(--navy-900);
+    border:1px solid var(--paper-line);
+    padding:9px 16px;
+    font-size:13.5px;
+    font-weight:600;
+    border-radius:999px;
+  }
+  .btn-util:hover{border-color:var(--gold-500);background:var(--paper);}
+
+  .print-only{display:none;}
+  .print-only h2{font-family:'Noto Serif Thai', serif;font-size:19px;color:var(--navy-900);margin:0 0 4px;}
+  .print-only p{font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;}
 
   /* ---------- Form ---------- */
   form.entry-form{
@@ -331,7 +346,7 @@
   #periodSelect:focus{outline:none;border-color:var(--gold-500);}
   .dash-summary{
     display:grid;
-    grid-template-columns:repeat(4,1fr);
+    grid-template-columns:repeat(5,1fr);
     gap:14px;
     margin-bottom:20px;
   }
@@ -348,6 +363,27 @@
   .dash-card .value.debit{color:var(--debit);}
   .dash-card.highlight{border-color:var(--gold-500);background:linear-gradient(160deg,#fff,var(--paper));}
   .dash-card.highlight .value{color:var(--gold-600);}
+  .dash-card.hero{background:linear-gradient(160deg, var(--navy-950), var(--navy-800));border-color:var(--navy-900);}
+  .dash-card.hero .label{color:var(--gold-300);}
+  .dash-card.hero .value{color:#FCF9EF;font-size:26px;}
+  .dash-card .sub{font-size:12px;color:var(--ink-soft);margin-top:6px;}
+  .dash-card.hero .sub{color:rgba(251,248,240,0.62);}
+  .dash-card .breakdown{margin-top:10px;display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--ink-soft);}
+  .dash-card .breakdown b{color:var(--ink);font-weight:600;}
+  .dash-card.hero .breakdown b{color:#FCF9EF;}
+  .trend{font-weight:700;margin-left:4px;}
+  .trend.up{color:var(--debit);}
+  .trend.down{color:var(--credit);}
+  .dash-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:stretch;}
+  .donut-row{display:flex;align-items:center;gap:22px;flex-wrap:wrap;min-height:130px;}
+  .donut{width:128px;height:128px;border-radius:50%;flex:none;position:relative;}
+  .donut::after{content:"";position:absolute;inset:20px;background:var(--card);border-radius:50%;}
+  .donut-empty{color:var(--ink-soft);font-size:13.5px;}
+  .donut-legend{display:flex;flex-direction:column;gap:12px;font-size:13.5px;flex:1;min-width:140px;}
+  .donut-legend .row{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .donut-legend .tag{display:flex;align-items:center;gap:8px;color:var(--ink-soft);}
+  .donut-legend .tag .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .donut-legend .row b{font-family:'Noto Serif Thai', serif;color:var(--navy-900);}
   .dash-chart-wrap{
     background:var(--card);
     border:1px solid var(--paper-line);
@@ -423,8 +459,21 @@
     .icon-btn{padding:7px 12px;background:var(--paper);}
 
     .dash-summary{grid-template-columns:repeat(2,1fr);}
+    .dash-summary .dash-card.hero{grid-column:1 / -1;}
+    .dash-grid{grid-template-columns:1fr;}
     .bars{height:140px;}
     .bar{width:5px;}
+  }
+
+  /* ---------- Print (PDF export) ---------- */
+  @media print{
+    header, .view-tabs, .size-tabs, .toolbar, form.entry-form, #dashboardView, footer{display:none !important;}
+    th.print-hide, td.actions{display:none !important;}
+    body{background:#fff;}
+    main{padding:0;max-width:none;}
+    .print-only{display:block;}
+    .table-wrap{box-shadow:none;border:1px solid #ccc;border-radius:0;}
+    thead th{background:#0C1F3E !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   }
 </style>
 </head>
@@ -452,19 +501,25 @@
 </header>
 
 <main>
-  <nav class="size-tabs" id="sizeTabs">
-    <button type="button" class="tab active" data-size="350">ขนาด 350 มล.</button>
-    <button type="button" class="tab" data-size="600">ขนาด 600 มล.</button>
-  </nav>
-
   <nav class="view-tabs" id="viewTabs">
     <button type="button" class="tab" data-view="ledger">บัญชีรายการ</button>
     <button type="button" class="tab active" data-view="dashboard">แดชบอร์ดสรุปยอด</button>
   </nav>
 
   <div id="ledgerView" style="display:none;">
+  <nav class="size-tabs" id="sizeTabs">
+    <button type="button" class="tab active" data-size="350">ขนาด 350 มล.</button>
+    <button type="button" class="tab" data-size="600">ขนาด 600 มล.</button>
+  </nav>
+
   <div class="toolbar">
     <button class="btn-add" id="toggleFormBtn" type="button">+ เพิ่มรายการ</button>
+    <div class="toolbar-utils">
+      <button class="btn-util" id="importBtn" type="button">⇧ นำเข้า Excel</button>
+      <button class="btn-util" id="exportExcelBtn" type="button">⇩ ส่งออก Excel</button>
+      <button class="btn-util" id="exportPdfBtn" type="button">⇩ ส่งออก PDF</button>
+      <input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none;">
+    </div>
     <span class="status" id="statusText">กำลังเชื่อมต่อฐานข้อมูล…</span>
   </div>
 
@@ -506,6 +561,11 @@
     </div>
   </form>
 
+  <div id="printHeader" class="print-only">
+    <h2>บัญชี รับ–จ่าย น้ำดื่มสวัสดิการ — ขนาด <span id="printSize">350</span> มล.</h2>
+    <p id="printMeta"></p>
+  </div>
+
   <div class="table-wrap">
     <div class="table-scroll">
     <table>
@@ -517,7 +577,7 @@
           <th class="num">เบิก</th>
           <th class="num">คงเหลือ</th>
           <th>หมายเหตุ</th>
-          <th style="width:90px;">จัดการ</th>
+          <th class="print-hide" style="width:90px;">จัดการ</th>
         </tr>
       </thead>
       <tbody id="tableBody">
@@ -542,18 +602,20 @@
     </div>
 
     <div id="dashContent">
-      <div class="dash-summary">
-        <div class="dash-card"><span class="label">ยอดรับรวม</span><span class="value credit" id="dashIn">–</span></div>
-        <div class="dash-card"><span class="label">ยอดเบิกรวม</span><span class="value debit" id="dashOut">–</span></div>
-        <div class="dash-card"><span class="label">คงเหลือต้นงวด</span><span class="value" id="dashOpen">–</span></div>
-        <div class="dash-card highlight"><span class="label">คงเหลือสิ้นงวด</span><span class="value" id="dashClose">–</span></div>
-      </div>
-      <div class="dash-chart-wrap">
-        <div class="dash-chart-title" id="dashChartTitle">รับ–เบิก</div>
-        <div class="bars" id="dashBars"></div>
-        <div class="legend">
-          <span><span class="dot in"></span>รับ</span>
-          <span><span class="dot out"></span>เบิก</span>
+      <div class="dash-summary" id="dashSummary"></div>
+
+      <div class="dash-grid">
+        <div class="dash-chart-wrap">
+          <div class="dash-chart-title" id="dashChartTitle">แนวโน้มความเคลื่อนไหว</div>
+          <div class="bars" id="dashBars"></div>
+          <div class="legend">
+            <span><span class="dot in"></span>350 มล.</span>
+            <span><span class="dot out"></span>600 มล.</span>
+          </div>
+        </div>
+        <div class="dash-chart-wrap">
+          <div class="dash-chart-title">สัดส่วนตามขนาดขวด (งวดนี้)</div>
+          <div class="donut-row" id="dashDonutRow"></div>
         </div>
       </div>
     </div>
@@ -567,6 +629,8 @@
 <!-- Firebase (compat SDK, no build step needed) -->
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<!-- SheetJS, for Excel import/export -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="firebase-config.js"></script>
 <script>
 (function(){
@@ -589,6 +653,13 @@
   const fNote = document.getElementById('f-note');
   const remainPreview = document.getElementById('remainPreview');
 
+  const importBtn = document.getElementById('importBtn');
+  const exportExcelBtn = document.getElementById('exportExcelBtn');
+  const exportPdfBtn = document.getElementById('exportPdfBtn');
+  const importFile = document.getElementById('importFile');
+  const printSizeEl = document.getElementById('printSize');
+  const printMetaEl = document.getElementById('printMeta');
+
   const viewTabs = document.getElementById('viewTabs');
   const ledgerView = document.getElementById('ledgerView');
   const dashboardView = document.getElementById('dashboardView');
@@ -596,12 +667,10 @@
   const periodSelect = document.getElementById('periodSelect');
   const dashEmpty = document.getElementById('dashEmpty');
   const dashContent = document.getElementById('dashContent');
-  const dashIn = document.getElementById('dashIn');
-  const dashOut = document.getElementById('dashOut');
-  const dashOpen = document.getElementById('dashOpen');
-  const dashClose = document.getElementById('dashClose');
+  const dashSummary = document.getElementById('dashSummary');
   const dashChartTitle = document.getElementById('dashChartTitle');
   const dashBars = document.getElementById('dashBars');
+  const dashDonutRow = document.getElementById('dashDonutRow');
 
   let activeSize = '350';
   let editingId = null;
@@ -634,10 +703,11 @@
   // Chronological (oldest -> newest) list for the active size, with a single running
   // balance in bottles — รับ/เบิก entered as แพ็ค are converted (×12) before adding,
   // so คงเหลือ is always one combined figure (e.g. "2 แพ็ค 3 ขวด").
-  function chronologicalEntries(){
+  function chronologicalEntries(size){
+    const sz = size || activeSize;
     let runningBottles = 0;
     const list = allEntries
-      .filter(e => (e.size || '350') === activeSize)
+      .filter(e => (e.size || '350') === sz)
       .map(e => {
         const unit = e.unit || 'แพ็ค';
         runningBottles += toBottles(e.received, unit) - toBottles(e.withdrawn, unit);
@@ -735,7 +805,6 @@
     subtitleText.textContent = `ขนาดขวด ${activeSize} มล. — บันทึกและติดตามยอดคงเหลือแบบเรียลไทม์`;
     closeForm();
     render();
-    if (activeView === 'dashboard') renderDashboard();
   });
 
   function esc(s){
@@ -780,13 +849,40 @@
     return `พ.ศ. ${Number(key) + 543}`;
   }
 
-  function renderDashboard(){
-    const { list } = chronologicalEntries(); // ascending, already filtered by activeSize
-    const dated = list
-      .map((e, i) => ({ ...e, _idx: i, _date: parseEntryDate(e.date) }))
-      .filter(e => e._date);
+  function periodShortLabel(key){
+    if (periodType === 'month'){
+      const [y, m] = key.split('-').map(Number);
+      return `${thMonthsShort[m - 1]} ${String((y + 543) % 100).padStart(2, '0')}`;
+    }
+    return `${Number(key) + 543}`;
+  }
 
-    if (!dated.length){
+  function shiftPeriod(key, delta){
+    if (periodType === 'month'){
+      let [y, m] = key.split('-').map(Number);
+      m += delta;
+      while (m < 1){ m += 12; y--; }
+      while (m > 12){ m -= 12; y++; }
+      return `${y}-${String(m).padStart(2, '0')}`;
+    }
+    return String(Number(key) + delta);
+  }
+
+  const SIZES = ['350', '600'];
+
+  function renderDashboard(){
+    // Pull both sizes independently — the dashboard never depends on the ledger's size tab.
+    const perSize = {};
+    SIZES.forEach(sz => {
+      const { list, finalBottles } = chronologicalEntries(sz);
+      const dated = list
+        .map((e, i) => ({ ...e, _idx: i, _date: parseEntryDate(e.date) }))
+        .filter(e => e._date);
+      perSize[sz] = { list, finalBottles, dated };
+    });
+
+    const allDated = SIZES.flatMap(sz => perSize[sz].dated);
+    if (!allDated.length){
       dashEmpty.style.display = '';
       dashContent.style.display = 'none';
       periodSelect.innerHTML = '';
@@ -798,64 +894,110 @@
     periodSelect.disabled = false;
 
     const keyOf = e => periodType === 'month' ? monthKey(e._date) : yearKey(e._date);
-    const keys = [...new Set(dated.map(keyOf))].sort().reverse();
+    const keys = [...new Set(allDated.map(keyOf))].sort().reverse();
     if (!selectedPeriod || !keys.includes(selectedPeriod)) selectedPeriod = keys[0];
 
     periodSelect.innerHTML = keys.map(k =>
       `<option value="${k}" ${k === selectedPeriod ? 'selected' : ''}>${periodLabel(k)}</option>`
     ).join('');
 
-    const inPeriod = dated.filter(e => keyOf(e) === selectedPeriod);
-    const idxs = inPeriod.map(e => e._idx);
-    const firstIdx = Math.min(...idxs);
-    const lastIdx = Math.max(...idxs);
-
-    let totalIn = 0, totalOut = 0;
-    inPeriod.forEach(e => {
-      const unit = e.unit || 'แพ็ค';
-      totalIn += toBottles(e.received, unit);
-      totalOut += toBottles(e.withdrawn, unit);
-    });
-
-    dashIn.textContent = formatBottles(totalIn);
-    dashOut.textContent = formatBottles(totalOut);
-    dashOpen.textContent = formatBottles(baseBeforeIndex(list, firstIdx));
-    dashClose.textContent = formatBottles(list[lastIdx].remainingBottles);
-
-    let bars;
-    if (periodType === 'month'){
-      const [y, m] = selectedPeriod.split('-').map(Number);
-      const daysInMonth = new Date(y, m, 0).getDate();
-      bars = Array.from({ length: daysInMonth }, (_, i) => ({ label: String(i + 1), in: 0, out: 0 }));
-      inPeriod.forEach(e => {
-        const day = e._date.getDate();
+    // Totals per size for the selected period (and for the previous period, for the trend arrow)
+    function totalsFor(sz, key){
+      let inSum = 0, outSum = 0, count = 0;
+      perSize[sz].dated.forEach(e => {
+        if (keyOf(e) !== key) return;
         const unit = e.unit || 'แพ็ค';
-        bars[day - 1].in += toBottles(e.received, unit);
-        bars[day - 1].out += toBottles(e.withdrawn, unit);
+        inSum += toBottles(e.received, unit);
+        outSum += toBottles(e.withdrawn, unit);
+        count++;
       });
-      dashChartTitle.textContent = `รับ–เบิก รายวัน — ${periodLabel(selectedPeriod)}`;
-    } else {
-      bars = thMonthsShort.map(label => ({ label, in: 0, out: 0 }));
-      inPeriod.forEach(e => {
-        const unit = e.unit || 'แพ็ค';
-        bars[e._date.getMonth()].in += toBottles(e.received, unit);
-        bars[e._date.getMonth()].out += toBottles(e.withdrawn, unit);
-      });
-      dashChartTitle.textContent = `รับ–เบิก รายเดือน — ${periodLabel(selectedPeriod)}`;
+      return { in: inSum, out: outSum, count };
     }
 
+    const cur = {}, prev = {};
+    SIZES.forEach(sz => {
+      cur[sz] = totalsFor(sz, selectedPeriod);
+      prev[sz] = totalsFor(sz, shiftPeriod(selectedPeriod, -1));
+    });
+    const curCount = SIZES.reduce((s, sz) => s + cur[sz].count, 0);
+    const prevCount = SIZES.reduce((s, sz) => s + prev[sz].count, 0);
+    const trendPct = prevCount ? Math.round((curCount - prevCount) / prevCount * 100) : null;
+
+    // ---- Summary cards ----
+    const trendHtml = trendPct === null
+      ? ''
+      : `<span class="trend ${trendPct >= 0 ? 'up' : 'down'}">${trendPct >= 0 ? '▲' : '▼'} ${Math.abs(trendPct)}%</span>`;
+
+    dashSummary.innerHTML = `
+      <div class="dash-card hero">
+        <span class="label">ความเคลื่อนไหวรวม — ${periodLabel(selectedPeriod)}</span>
+        <span class="value">${curCount.toLocaleString('th-TH')} รายการ</span>
+        <span class="sub">เทียบงวดก่อนหน้า ${trendHtml || '– ไม่มีข้อมูลเทียบ'}</span>
+        <div class="breakdown">
+          <span>350 มล.: <b>${cur['350'].count.toLocaleString('th-TH')} รายการ</b></span>
+          <span>600 มล.: <b>${cur['600'].count.toLocaleString('th-TH')} รายการ</b></span>
+        </div>
+      </div>
+      <div class="dash-card">
+        <span class="label">คงเหลือตอนนี้ — 350 มล.</span>
+        <span class="value">${formatBottles(perSize['350'].finalBottles)}</span>
+        <span class="sub">ยอดคงเหลือล่าสุดแบบเรียลไทม์</span>
+      </div>
+      <div class="dash-card">
+        <span class="label">คงเหลือตอนนี้ — 600 มล.</span>
+        <span class="value">${formatBottles(perSize['600'].finalBottles)}</span>
+        <span class="sub">ยอดคงเหลือล่าสุดแบบเรียลไทม์</span>
+      </div>
+      <div class="dash-card">
+        <span class="label">ยอดรับรวม — ${periodLabel(selectedPeriod)}</span>
+        <div class="breakdown">
+          <span>350 มล.: <b>${formatBottles(cur['350'].in)}</b></span>
+          <span>600 มล.: <b>${formatBottles(cur['600'].in)}</b></span>
+        </div>
+      </div>
+      <div class="dash-card">
+        <span class="label">ยอดเบิกรวม — ${periodLabel(selectedPeriod)}</span>
+        <div class="breakdown">
+          <span>350 มล.: <b>${formatBottles(cur['350'].out)}</b></span>
+          <span>600 มล.: <b>${formatBottles(cur['600'].out)}</b></span>
+        </div>
+      </div>
+    `;
+
+    // ---- Trend chart: last 6 periods, 350 vs 600 (received + withdrawn combined, in bottles) ----
+    const trendKeys = [];
+    for (let i = 5; i >= 0; i--) trendKeys.push(shiftPeriod(selectedPeriod, -i));
+    const bars = trendKeys.map(k => {
+      const t350 = totalsFor('350', k), t600 = totalsFor('600', k);
+      return { label: periodShortLabel(k), in: t350.in + t350.out, out: t600.in + t600.out };
+    });
+    dashChartTitle.textContent = periodType === 'month' ? 'แนวโน้ม 6 เดือนล่าสุด' : 'แนวโน้ม 6 ปีล่าสุด';
     const maxVal = Math.max(1, ...bars.map(b => Math.max(b.in, b.out)));
-    dashBars.innerHTML = bars.map((b, i) => {
-      const showLabel = periodType === 'year' || i === 0 || i === bars.length - 1 || (i + 1) % 5 === 0;
-      return `
+    dashBars.innerHTML = bars.map(b => `
       <div class="bar-group">
-        <div class="bar-pair" title="${esc(b.label)}: รับ ${formatBottles(b.in)} / เบิก ${formatBottles(b.out)}">
+        <div class="bar-pair" title="${esc(b.label)}: 350 มล. ${formatBottles(b.in)} / 600 มล. ${formatBottles(b.out)}">
           <div class="bar bar-in" style="height:${(b.in / maxVal * 100).toFixed(1)}%"></div>
           <div class="bar bar-out" style="height:${(b.out / maxVal * 100).toFixed(1)}%"></div>
         </div>
-        <span class="bar-label">${showLabel ? esc(b.label) : ''}</span>
-      </div>`;
-    }).join('');
+        <span class="bar-label">${esc(b.label)}</span>
+      </div>`).join('');
+
+    // ---- Donut: share of this period's total activity by size ----
+    const total350 = cur['350'].in + cur['350'].out;
+    const total600 = cur['600'].in + cur['600'].out;
+    const grand = total350 + total600;
+    if (!grand){
+      dashDonutRow.innerHTML = `<span class="donut-empty">ยังไม่มีความเคลื่อนไหวในงวดนี้</span>`;
+    } else {
+      const p350 = Math.round(total350 / grand * 100);
+      dashDonutRow.innerHTML = `
+        <div class="donut" style="background:conic-gradient(var(--gold-500) 0% ${p350}%, var(--navy-800) ${p350}% 100%);"></div>
+        <div class="donut-legend">
+          <div class="row"><span class="tag"><span class="dot" style="background:var(--gold-500)"></span>350 มล.</span><b>${p350}%</b></div>
+          <div class="row"><span class="tag"><span class="dot" style="background:var(--navy-800)"></span>600 มล.</span><b>${100 - p350}%</b></div>
+        </div>
+      `;
+    }
   }
 
   function render(){
@@ -1003,6 +1145,129 @@
       statusText.classList.add('err');
     }
   }
+
+  // ---------- Export / Import (per active bottle size) ----------
+  function todayStamp(){
+    const d = new Date();
+    return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  exportExcelBtn.addEventListener('click', () => {
+    if (typeof XLSX === 'undefined'){
+      alert('โหลดไลบรารี Excel ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่');
+      return;
+    }
+    const { list } = chronologicalEntries(activeSize);
+    if (!list.length){ alert(`ยังไม่มีรายการขนาด ${activeSize} มล. ให้ส่งออก`); return; }
+
+    const rows = list.map(e => {
+      const d = parseEntryDate(e.date);
+      return {
+        'วันที่': d ? toDateInputValue(d) : (e.date || ''),
+        'รายการ': e.item || '',
+        'รับ': num(e.received) || 0,
+        'เบิก': num(e.withdrawn) || 0,
+        'หน่วย': e.unit || 'แพ็ค',
+        'คงเหลือ': formatBottles(e.remainingBottles),
+        'หมายเหตุ': e.note || ''
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{ wch: 12 }, { wch: 28 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 16 }, { wch: 24 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, `ขนาด ${activeSize} มล.`);
+    XLSX.writeFile(wb, `บัญชีน้ำ-${activeSize}มล-${todayStamp()}.xlsx`);
+  });
+
+  exportPdfBtn.addEventListener('click', () => {
+    const { list, finalBottles } = chronologicalEntries(activeSize);
+    if (activeView !== 'ledger'){
+      viewTabs.querySelector('[data-view="ledger"]').click();
+    }
+    printSizeEl.textContent = activeSize;
+    printMetaEl.textContent = `พิมพ์เมื่อ ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })} • ทั้งหมด ${list.length.toLocaleString('th-TH')} รายการ • คงเหลือล่าสุด ${formatBottles(finalBottles)}`;
+    setTimeout(() => window.print(), 60);
+  });
+
+  importBtn.addEventListener('click', () => importFile.click());
+
+  importFile.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    importFile.value = '';
+    if (!file) return;
+    if (typeof XLSX === 'undefined'){
+      alert('โหลดไลบรารี Excel ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่');
+      return;
+    }
+    if (!col || !db){
+      alert('ยังเชื่อมต่อฐานข้อมูลไม่ได้ ตรวจสอบการเชื่อมต่อก่อนนำเข้าข้อมูล');
+      return;
+    }
+
+    function pick(row, aliases){
+      const keys = Object.keys(row);
+      for (const alias of aliases){
+        const k = keys.find(k => k.trim().toLowerCase() === alias.toLowerCase());
+        if (k !== undefined && row[k] !== undefined) return row[k];
+      }
+      return '';
+    }
+
+    try{
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array', cellDates: true });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+      const parsed = rows.map(row => {
+        let rawDate = pick(row, ['วันที่', 'วัน/เดือน/ปี', 'date']);
+        if (rawDate instanceof Date) rawDate = toDateInputValue(rawDate);
+        rawDate = String(rawDate).trim();
+        const d = parseEntryDate(rawDate);
+        const item = String(pick(row, ['รายการ', 'item'])).trim();
+        const received = Number(pick(row, ['รับ', 'received', 'in'])) || 0;
+        const withdrawn = Number(pick(row, ['เบิก', 'withdrawn', 'out'])) || 0;
+        let unit = String(pick(row, ['หน่วย', 'unit'])).trim();
+        unit = unit.includes('ขวด') ? 'ขวด' : 'แพ็ค';
+        const note = String(pick(row, ['หมายเหตุ', 'note', 'remark'])).trim();
+        return { date: d ? toDateInputValue(d) : rawDate, item, received, withdrawn, unit, note };
+      }).filter(r => r.item || r.received || r.withdrawn);
+
+      if (!parsed.length){
+        alert('ไม่พบข้อมูลที่นำเข้าได้ในไฟล์นี้ — ตรวจสอบว่าหัวคอลัมน์ตรงกับไฟล์ที่ส่งออกจากระบบ (วันที่, รายการ, รับ, เบิก, หน่วย, หมายเหตุ)');
+        return;
+      }
+
+      const ok = confirm(`พบ ${parsed.length} รายการในไฟล์ ต้องการเพิ่มต่อท้ายรายการปัจจุบันของขนาด ${activeSize} มล. หรือไม่?\n(จะเพิ่มเข้าไปเท่านั้น ไม่ลบหรือเขียนทับข้อมูลเดิม)`);
+      if (!ok) return;
+
+      statusText.textContent = `กำลังนำเข้า ${parsed.length} รายการ…`;
+      statusText.classList.remove('err');
+
+      let order = nextOrder[activeSize] || 1;
+      const CHUNK = 400; // stay under Firestore's 500-write batch limit
+      for (let i = 0; i < parsed.length; i += CHUNK){
+        const batch = db.batch();
+        parsed.slice(i, i + CHUNK).forEach(r => {
+          batch.set(col.doc(), {
+            date: r.date, item: r.item, received: r.received, withdrawn: r.withdrawn,
+            unit: r.unit, note: r.note, size: activeSize, order: order++,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        });
+        await batch.commit();
+      }
+
+      statusText.textContent = `นำเข้าสำเร็จ ${parsed.length} รายการ`;
+      statusText.classList.remove('err');
+      statusText.classList.add('ok');
+    } catch(err){
+      console.error(err);
+      statusText.textContent = 'นำเข้าไม่สำเร็จ: ' + err.message;
+      statusText.classList.remove('ok');
+      statusText.classList.add('err');
+    }
+  });
 
 })();
 </script>
