@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>บัญชีรับ-ส่งน้ำ | วิทยาลัยเทคนิคศรีสะเกษ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --navy-950:#081327;
@@ -438,28 +438,28 @@
     padding:34px 40px;
   }
   .form-sheet{
-    font-family:'Noto Sans Thai', sans-serif;
-    font-size:15px;
+    font-family:'Sarabun', 'Noto Sans Thai', sans-serif;
+    font-size:14pt;
     color:var(--ink);
-    line-height:2.1;
+    line-height:1.25;
   }
-  .fs-title{text-align:center;margin-bottom:14px;}
-  .fs-title .t1{font-family:'Noto Serif Thai', serif;font-weight:700;font-size:19px;color:var(--navy-900);}
-  .fs-title .t2{font-family:'Noto Serif Thai', serif;font-weight:700;font-size:17px;color:var(--navy-900);}
+  .fs-title{text-align:center;margin-bottom:6px;}
+  .fs-title .t1{font-family:'Sarabun', 'Noto Sans Thai', sans-serif;font-weight:700;font-size:14pt;color:var(--navy-900);}
+  .fs-title .t2{font-family:'Sarabun', 'Noto Sans Thai', sans-serif;font-weight:700;font-size:14pt;color:var(--navy-900);}
   .fs-row{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
   .fs-date-block{margin-bottom:2px;}
   .fs-date-line1{text-align:right;}
   .fs-date-line2{text-align:center;}
-  .fs-para{margin:2px 0;}
-  .fs-center{text-align:center;margin:14px 0;}
+  .fs-para{margin:1px 0;}
+  .fs-center{text-align:center;margin:8px 0;}
   .blank{
     font-family:inherit;
-    font-size:15px;
+    font-size:14pt;
     color:var(--ink);
     border:none;
     border-bottom:1px dotted var(--ink-faint);
     background:transparent;
-    padding:2px 4px;
+    padding:1px 4px;
     text-align:center;
   }
   .blank:focus{outline:none;border-bottom:1px solid var(--gold-500);}
@@ -474,35 +474,36 @@
     align-items:center;
     gap:14px;
     flex-wrap:wrap;
-    margin:4px 0;
+    margin:1px 0;
   }
   .fs-check-row label{display:flex;align-items:center;gap:8px;}
-  .fs-check-row input[type="checkbox"]{width:16px;height:16px;accent-color:var(--navy-900);}
-  .fs-stock{font-size:12.5px;color:var(--ink-soft);}
-  .fs-sign{margin-top:24px;text-align:right;}
-  .fs-sign .line{margin:2px 0;}
+  .fs-check-row input[type="checkbox"]{width:14px;height:14px;accent-color:var(--navy-900);}
+  .fs-stock{font-size:11pt;color:var(--ink-soft);}
+  .fs-sign{margin-top:8px;text-align:right;}
+  .fs-sign .line{margin:1px 0;}
   .fs-sign .role{text-align:center;}
 
   .fs-grid{
-    margin-top:26px;
+    margin-top:8px;
     border:1px solid var(--paper-line);
     display:grid;
     grid-template-columns:1fr 1fr;
   }
   .fs-cell{
     border:1px solid var(--paper-line);
-    padding:16px 18px;
+    padding:6px 14px;
     text-align:center;
-    line-height:1.9;
+    line-height:1.35;
+    font-size:12pt;
   }
-  .fs-cell .role-title{font-family:'Noto Serif Thai', serif;font-weight:600;font-size:15.5px;color:var(--navy-900);margin-bottom:8px;}
+  .fs-cell .role-title{font-family:'Sarabun', 'Noto Sans Thai', sans-serif;font-weight:600;font-size:12pt;color:var(--navy-900);margin-bottom:4px;}
   .fs-cell .role-title.editable{display:inline-flex;align-items:center;gap:4px;}
-  .fs-cell .opt-row{display:flex;align-items:center;gap:8px;justify-content:flex-start;margin:2px 0;flex-wrap:wrap;font-size:14px;}
-  .fs-cell .opt-row input[type="checkbox"]{width:15px;height:15px;accent-color:var(--navy-900);}
-  .fs-cell .sign-area{margin-top:14px;}
+  .fs-cell .opt-row{display:flex;align-items:center;gap:8px;justify-content:flex-start;margin:1px 0;flex-wrap:wrap;font-size:12pt;}
+  .fs-cell .opt-row input[type="checkbox"]{width:13px;height:13px;accent-color:var(--navy-900);}
+  .fs-cell .sign-area{margin-top:8px;}
   .fs-cell .name-line{font-weight:600;margin-top:2px;}
-  .fs-cell .name-line .blank{font-weight:600;}
-  .fs-cell .date-slashes{margin-top:10px;color:var(--ink-soft);}
+  .fs-cell .name-line .blank{font-weight:600;font-size:12pt;}
+  .fs-cell .date-slashes{margin-top:6px;color:var(--ink-soft);}
 
   @media (max-width:700px){
     .form-sheet-wrap{padding:20px 16px;}
@@ -573,8 +574,10 @@
   body.printing-request .form-sheet-wrap{box-shadow:none;border:none;padding:0;}
   body.printing-request .blank{border-bottom:1px solid #999;}
   @media print{
+    @page{size:letter;margin:0.5in;}
+    body{min-height:0;}
     body.printing-request header, body.printing-request .view-tabs, body.printing-request footer{display:none !important;}
-    body.printing-request main{padding:14px 6px;}
+    body.printing-request main{padding:0;max-width:none;}
   }
 
   /* ---------- Access gate ---------- */
