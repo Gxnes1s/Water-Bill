@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>บัญชี รับ-จ่าย น้ำสวัสดิการ</title>
+<title>บัญชีรับ-ส่งน้ำ | วิทยาลัยเทคนิคศรีสะเกษ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -589,8 +589,8 @@
         </svg>
       </span>
       <div class="title-block">
-        <p class="eyebrow">แผนกสวัสดิการ</p>
-        <h1>บัญชี รับ – จ่าย น้ำดื่มสวัสดิการ</h1>
+        <p class="eyebrow">งานพัสดุ</p>
+        <h1>บัญชีรับ-ส่งน้ำ</h1>
         <p class="subtitle" id="subtitleText">บันทึกและติดตามยอดคงเหลือแบบเรียลไทม์</p>
       </div>
     </div>
@@ -603,9 +603,9 @@
 
 <main>
   <nav class="view-tabs" id="viewTabs">
-    <button type="button" class="tab" data-view="ledger">บัญชีรายการ</button>
-    <button type="button" class="tab active" data-view="dashboard">สรุปยอดการเบิกน้ำ</button>
-    <button type="button" class="tab" data-view="requestForm">แบบฟอร์มขอใช้น้ำ</button>
+    <button type="button" class="tab active" data-view="requestForm">แบบฟอร์มขอใช้น้ำ</button>
+    <button type="button" class="tab" data-view="ledger">บัญชีรับ-ส่งน้ำ</button>
+    <button type="button" class="tab" data-view="dashboard">สรุปยอดการเบิกน้ำ</button>
   </nav>
 
   <div id="ledgerView" style="display:none;">
@@ -664,7 +664,7 @@
   </form>
 
   <div id="printHeader" class="print-only">
-    <h2>บัญชี รับ–จ่าย น้ำดื่มสวัสดิการ — ขนาด <span id="printSize">350</span> มล.</h2>
+    <h2>บัญชีรับ-ส่งน้ำ — ขนาด <span id="printSize">350</span> มล.</h2>
     <p id="printMeta"></p>
   </div>
 
@@ -690,7 +690,7 @@
   </div>
   </div>
 
-  <div id="dashboardView">
+  <div id="dashboardView" style="display:none;">
     <div class="dash-controls">
       <div class="segmented" id="periodTypeTabs">
         <button type="button" class="active" data-ptype="month">รายเดือน</button>
@@ -723,7 +723,7 @@
     </div>
   </div>
 
-  <div id="requestFormView" style="display:none;">
+  <div id="requestFormView">
     <div class="rf-toolbar">
       <span class="rf-hint">กรอกแบบฟอร์มตามเอกสารต้นฉบับ — ยอดขอใช้จะถูกเพิ่มเข้าบัญชี 350/600 มล. ให้อัตโนมัติเมื่อกด "บันทึกและเพิ่มเข้าบัญชี"</span>
       <div class="toolbar-utils">
@@ -754,11 +754,11 @@
         <div class="fs-para">ในวัน <input class="blank sm" type="text" id="rf-eventday-name" placeholder="วันที่..."> ที่ <input class="blank xs" type="text" id="rf-eventday" placeholder="วว"> เดือน <input class="blank md" type="text" id="rf-eventmonth" placeholder="เดือน"> พ.ศ. <input class="blank sm" type="text" id="rf-eventyear" placeholder="ปปปป"></div>
 
         <div class="fs-check-row">
-          <label><input type="checkbox" id="rf-350-check"> ขนาด 350 มล. จำนวน <input class="blank sm num" type="number" id="rf-350-qty" min="0" step="1" placeholder="0"> ขวด</label>
+          <label><input type="checkbox" id="rf-350-check"> ขนาด 350 มล. จำนวน <input class="blank sm num" type="number" id="rf-350-qty" min="0" step="1" placeholder="0"> แพ็ค</label>
           <span class="fs-stock" id="rf-350-stock">คงเหลือปัจจุบัน: –</span>
         </div>
         <div class="fs-check-row">
-          <label><input type="checkbox" id="rf-600-check"> ขนาด 600 มล. จำนวน <input class="blank sm num" type="number" id="rf-600-qty" min="0" step="1" placeholder="0"> ขวด</label>
+          <label><input type="checkbox" id="rf-600-check"> ขนาด 600 มล. จำนวน <input class="blank sm num" type="number" id="rf-600-qty" min="0" step="1" placeholder="0"> แพ็ค</label>
           <span class="fs-stock" id="rf-600-stock">คงเหลือปัจจุบัน: –</span>
         </div>
 
@@ -785,8 +785,8 @@
 
           <div class="fs-cell">
             <div class="role-title">หัวหน้างานพัสดุ</div>
-            <div class="opt-row"><input type="checkbox" id="rf-store-350"> น้ำดื่มขนาด 350 มล. ขอใช้ <b id="rf-store-350-qty">0</b> ขวด / คงเหลือ <b id="rf-store-350-remain">0</b> ขวด</div>
-            <div class="opt-row"><input type="checkbox" id="rf-store-600"> น้ำดื่มขนาด 600 มล. ขอใช้ <b id="rf-store-600-qty">0</b> ขวด / คงเหลือ <b id="rf-store-600-remain">0</b> ขวด</div>
+            <div class="opt-row"><input type="checkbox" id="rf-store-350"> น้ำดื่มขนาด 350 มล. ขอใช้ <b id="rf-store-350-qty">0</b> แพ็ค / คงเหลือ <b id="rf-store-350-remain">0</b></div>
+            <div class="opt-row"><input type="checkbox" id="rf-store-600"> น้ำดื่มขนาด 600 มล. ขอใช้ <b id="rf-store-600-qty">0</b> แพ็ค / คงเหลือ <b id="rf-store-600-remain">0</b></div>
             <div class="sign-area">
               (ลงชื่อ)........................................
               <div class="name-line">( นายสันติรักษ์ โตรัศมี )</div>
@@ -918,9 +918,9 @@
     return { list, finalBottles: runningBottles };
   }
 
-  // Newest-first list for display
+  // Oldest-first list for display, so newly added entries always land at the bottom
   function visibleEntries(){
-    return chronologicalEntries().list.slice().reverse();
+    return chronologicalEntries().list;
   }
 
   function baseBeforeIndex(ascList, idx){
@@ -1014,7 +1014,7 @@
   }
 
   // ---------- View switch: บัญชีรายการ <-> แดชบอร์ด ----------
-  let activeView = 'dashboard';
+  let activeView = 'requestForm';
   viewTabs.addEventListener('click', (e) => {
     const btn = e.target.closest('.tab');
     if (!btn) return;
@@ -1359,7 +1359,7 @@
     const q350 = num(rf350Qty.value);
     const q600 = num(rf600Qty.value);
     if (q350 <= 0 && q600 <= 0){
-      rfSetStatus('กรุณาระบุจำนวนขวดที่ขอใช้อย่างน้อย 1 ขนาด', false);
+      rfSetStatus('กรุณาระบุจำนวนแพ็คที่ขอใช้อย่างน้อย 1 ขนาด', false);
       return;
     }
     if (!col){
@@ -1381,20 +1381,20 @@
       const jobs = [];
       if (q350 > 0){
         jobs.push(col.add({
-          date: today, item: itemLabel, received: 0, withdrawn: q350, unit: 'ขวด', note,
+          date: today, item: itemLabel, received: 0, withdrawn: q350, unit: 'แพ็ค', note,
           size: '350', order: nextOrder['350'] || 1,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         }));
       }
       if (q600 > 0){
         jobs.push(col.add({
-          date: today, item: itemLabel, received: 0, withdrawn: q600, unit: 'ขวด', note,
+          date: today, item: itemLabel, received: 0, withdrawn: q600, unit: 'แพ็ค', note,
           size: '600', order: nextOrder['600'] || 1,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         }));
       }
       await Promise.all(jobs);
-      rfSetStatus('บันทึกสำเร็จ — เพิ่มยอดเบิกเข้าบัญชีแล้ว', true);
+      rfSetStatus('');
     } catch(err){
       console.error(err);
       if (err.code === 'permission-denied'){
