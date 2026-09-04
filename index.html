@@ -568,7 +568,8 @@
   }
   body.printing-request main > *:not(#requestFormView){display:none !important;}
   body.printing-request .rf-toolbar{display:none !important;}
-  body.printing-request .form-sheet-wrap{box-shadow:none;border:none;padding:0;}
+  body.printing-request .form-sheet-wrap{box-shadow:none;border:1px solid #000;border-radius:0;padding:18px 22px;}
+  body.printing-request .fs-grid, body.printing-request .fs-cell{border-color:#000;}
   body.printing-request .blank{border-bottom:1px solid #999;}
   @media print{
     @page{size:letter;margin:0.5in;}
@@ -835,7 +836,7 @@
         <div class="fs-para">เรียน&nbsp; ผู้อำนวยการวิทยาลัยเทคนิคศรีสะเกษ</div>
         <div class="fs-para">เรื่อง&nbsp; ขอใช้น้ำสวัสดิการวิทยาลัยเทคนิคศรีสะเกษ</div>
 
-        <div class="fs-para">ข้าพเจ้า <input class="blank xl" type="text" id="rf-name" placeholder="ชื่อ-สกุล"> ตำแหน่ง <input class="blank lg" type="text" id="rf-position" placeholder="ตำแหน่ง"></div>
+        <div class="fs-para">ข้าพเจ้า <input class="blank lg" type="text" id="rf-name" placeholder="ชื่อ-สกุล"> ตำแหน่ง <input class="blank md" type="text" id="rf-position" placeholder="ตำแหน่ง"></div>
         <div class="fs-para">มีความประสงค์ขอใช้น้ำสวัสดิการวิทยาลัยเทคนิคศรีสะเกษ เพื่อใช้ในโครงการ <input class="blank xl" type="text" id="rf-project" placeholder="ชื่อโครงการ/กิจกรรม"></div>
         <div class="fs-para">ในวัน <input class="blank sm" type="text" id="rf-eventday-name" placeholder="วันที่..."> ที่ <input class="blank xs" type="text" id="rf-eventday" placeholder="วว"> เดือน <input class="blank md" type="text" id="rf-eventmonth" placeholder="เดือน"> พ.ศ. <input class="blank sm" type="text" id="rf-eventyear" placeholder="ปปปป"></div>
 
