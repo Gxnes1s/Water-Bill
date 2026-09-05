@@ -719,7 +719,7 @@
   <form class="entry-form" id="entryForm">
     <div class="field">
       <label for="f-date">วัน/เดือน/ปี</label>
-      <input type="date" id="f-date">
+      <input type="text" id="f-date" placeholder="วว/ดด/ปปปป" inputmode="numeric" maxlength="10" autocomplete="off">
     </div>
     <div class="field">
       <label for="f-item">รายการ</label>
@@ -1080,9 +1080,9 @@
   }
 
   // ---------- Dates ----------
-  // New entries are saved from <input type="date"> as "yyyy-mm-dd". Older entries
-  // recorded before the dashboard existed may hold free-text like "29/5/26" — this
-  // parses both so the dashboard can summarize every record it possibly can.
+  // New entries are saved from the f-date text field as "dd/mm/yyyy" (e.g. "05/09/2026").
+  // Older entries recorded before this existed may hold "yyyy-mm-dd" or short forms like
+  // "29/5/26" — this parses all of them so the dashboard can summarize every record it can.
   const thMonthsFull = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
   const thMonthsShort = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 
@@ -1109,6 +1109,23 @@
     if (!d) return '';
     const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${dd}`;
+  }
+
+  // For the f-date text field, always displayed/typed as dd/mm/yyyy regardless of browser locale
+  function toDMYValue(d){
+    if (!d) return '';
+    const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
+    return `${dd}/${m}/${y}`;
+  }
+
+  // Auto-inserts "/" as the user types digits, keeping the visible order fixed at dd/mm/yyyy
+  function formatDMYInput(raw){
+    const digits = raw.replace(/\D/g, '').slice(0, 8);
+    const day = digits.slice(0, 2), mon = digits.slice(2, 4), yr = digits.slice(4, 8);
+    let out = day;
+    if (mon) out += '/' + mon;
+    if (yr) out += '/' + yr;
+    return out;
   }
 
   function formatDateDisplay(str){
@@ -1149,6 +1166,13 @@
   fIn.addEventListener('input', updatePreview);
   fOut.addEventListener('input', updatePreview);
   fUnit.addEventListener('change', updatePreview);
+  fDate.addEventListener('input', () => {
+    const pos = fDate.selectionStart;
+    const before = fDate.value.length;
+    fDate.value = formatDMYInput(fDate.value);
+    const after = fDate.value.length;
+    fDate.selectionStart = fDate.selectionEnd = Math.max(0, pos + (after - before));
+  });
 
   sizeTabs.addEventListener('click', (e) => {
     const btn = e.target.closest('.tab');
@@ -1396,7 +1420,7 @@
     const e = allEntries.find(x => x.id === id);
     if (!e) return;
     editingId = id;
-    fDate.value = toDateInputValue(parseEntryDate(e.date));
+    fDate.value = toDMYValue(parseEntryDate(e.date));
     fItem.value = e.item || '';
     fIn.value = e.received || '';
     fOut.value = e.withdrawn || '';
@@ -1634,6 +1658,12 @@
     }
     const item = fItem.value.trim();
     if (!item) { fItem.focus(); return; }
+
+    if (fDate.value.trim() && !parseEntryDate(fDate.value.trim())) {
+      alert('รูปแบบวันที่ไม่ถูกต้อง กรุณากรอกเป็น วว/ดด/ปปปป');
+      fDate.focus();
+      return;
+    }
 
     const data = {
       date: fDate.value.trim(),
